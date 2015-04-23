@@ -2,7 +2,8 @@ import Node.{AddOutput, AddInput}
 import akka.actor._
 
 object Node {
-  case class Input(feature: Double, weight: Double)
+  case class Input(feature: Double)
+  case class WeightedInput(feature: Double, weight: Double)
 
   /*case object GetWeight
   case class Weight(weight: Double)*/
@@ -14,11 +15,11 @@ object Node {
 trait Node extends Actor
 
 trait HasInputs extends Node {
-  var inputNodes: Seq[ActorRef]
-  def addInput: Receive = { case AddInput(i) => inputNodes = i }
+  var inputs: Seq[ActorRef]
+  def addInput: Receive = { case AddInput(i) => inputs = i }
 }
 
 trait HasOutputs extends Node {
-  var outputNodes: Seq[ActorRef]
-  def addOutput: Receive = { case AddOutput(o) => outputNodes = o }
+  var outputs: Seq[ActorRef]
+  def addOutput: Receive = { case AddOutput(o) => outputs = o }
 }

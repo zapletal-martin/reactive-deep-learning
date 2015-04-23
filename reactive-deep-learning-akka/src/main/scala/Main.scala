@@ -1,19 +1,50 @@
-import Node.{Input, AddInput, AddOutput}
-import akka.actor.{Props, ActorSystem}
+import Node.{AddInput, AddOutput}
+import akka.actor.{Actor, ActorSystem, Props}
+
+import scala.concurrent.duration._
+
 
 object Main extends App {
 
   override def main(params: Array[String]) = {
     val system = ActorSystem("test")
 
+    //Input layer nodes.
     val inputLayer1 = system.actorOf(Props[InputNode])
     val inputLayer2 = system.actorOf(Props[InputNode])
     val inputLayer3 = system.actorOf(Props[InputNode])
 
+    //Hidden layer nodes.
     val hiddenLayer1 = system.actorOf(Props[Perceptron])
     val hiddenLayer2 = system.actorOf(Props[Perceptron])
 
+    //Output layer nodes.
     val outputLayer = system.actorOf(Props[OutputNode])
+
+    //Input layer to hidden layer edges.
+    val edgei1h1 = system.actorOf(Props(new Edge(inputLayer1, hiddenLayer1)))
+    val edgei1h2 = system.actorOf(Props(new Edge(inputLayer1, hiddenLayer2)))
+    val edgei2h1 = system.actorOf(Props(new Edge(inputLayer2, hiddenLayer1)))
+    val edgei2h2 = system.actorOf(Props(new Edge(inputLayer2, hiddenLayer2)))
+    val edgei3h1 = system.actorOf(Props(new Edge(inputLayer3, hiddenLayer1)))
+    val edgei3h2 = system.actorOf(Props(new Edge(inputLayer3, hiddenLayer2)))
+
+    //Hidden layer to output layer edges.
+    val edgeh1o1 = system.actorOf(Props(new Edge(hiddenLayer1, outputLayer)))
+    val edgeh2o1 = system.actorOf(Props(new Edge(hiddenLayer2, outputLayer)))
+
+    //Linking edges to nodes.
+    inputLayer1 ! AddOutput(Seq(edgei1h1, edgei1h2))
+    inputLayer2 ! AddOutput(Seq(edgei2h1, edgei2h2))
+    inputLayer3 ! AddOutput(Seq(edgei3h1, edgei1h2))
+
+    hiddenLayer1 ! AddInput(Seq(edgei1h1, edgei2h1, edgei3h1))
+    hiddenLayer1 ! AddOutput(Seq(edgeh1o1))
+
+    hiddenLayer1 ! AddInput(Seq(edgei1h2, edgei2h2, edgei3h2))
+    hiddenLayer1 ! AddOutput(Seq(edgeh2o1))
+
+    outputLayer ! AddInput(Seq(edgeh1o1, edgeh2o1))
 
     //**************************************
     // I-----
@@ -26,35 +57,25 @@ object Main extends App {
     //  /    |
     // I-----
     //**************************************
-    inputLayer1 ! AddOutput(Seq(hiddenLayer1))
-    inputLayer1 ! AddOutput(Seq(hiddenLayer2))
-    inputLayer2 ! AddOutput(Seq(hiddenLayer1))
-    inputLayer2 ! AddOutput(Seq(hiddenLayer2))
-    inputLayer3 ! AddOutput(Seq(hiddenLayer1))
-    inputLayer3 ! AddOutput(Seq(hiddenLayer2))
 
-    hiddenLayer1 ! AddInput(Seq(inputLayer1))
-    hiddenLayer1 ! AddInput(Seq(inputLayer2))
-    hiddenLayer1 ! AddInput(Seq(inputLayer3))
-    hiddenLayer1 ! AddOutput(Seq(outputLayer))
+    scala.io.Source.fromFile("src/main/resources/data.csv")
+      .getLines()
+      .foreach{ l =>
+        val splits = l.split(",")
 
-    hiddenLayer2 ! AddInput(Seq(inputLayer1))
-    hiddenLayer2 ! AddInput(Seq(inputLayer2))
-    hiddenLayer2 ! AddInput(Seq(inputLayer3))
-    hiddenLayer2 ! AddOutput(Seq(outputLayer))
+        inputLayer1 ! splits(0).toDouble
+        inputLayer2 ! splits(1).toDouble
+        inputLayer3 ! splits(2).toDouble
+      }
 
-    outputLayer ! AddInput(Seq(hiddenLayer1))
-    outputLayer ! AddInput(Seq(hiddenLayer2))
+    val reaper = system.actorOf(Props(new Actor {
+      override def receive: Receive = {
+        case _ => system.terminate()
+      }
+    }))
 
-    while(true) {
-      val in1 = scala.io.StdIn.readLine().toDouble
-      val in2 = scala.io.StdIn.readLine().toDouble
-      val in3 = scala.io.StdIn.readLine().toDouble
-
-      inputLayer1 ! in1
-      inputLayer2 ! in2
-      inputLayer3 ! in3
-    }
+    import system.dispatcher
+    system.scheduler.scheduleOnce(5 second, reaper, 'bye)
   }
 
 }

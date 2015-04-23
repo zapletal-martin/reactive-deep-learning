@@ -1,12 +1,12 @@
-import Node.Input
+import Node.WeightedInput
 import akka.actor.ActorRef
 
 class OutputNode() extends HasInputs {
-  override var inputNodes: Seq[ActorRef] = Seq()
+  override var inputs: Seq[ActorRef] = Seq()
 
   override def receive = run orElse addInput
 
   def run: Receive = {
-    case Input(a, w) => println(s"Output: $a")
+    case WeightedInput(a, w) => println(s"Output: $a")
   }
 }

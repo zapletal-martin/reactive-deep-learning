@@ -1,8 +1,8 @@
 import Node._
+import akka.actor.ActorRef
 
 class Perceptron() extends Neuron {
 
-  override var weight: Double = 0.2
   override var activationFunction: Double => Double = Neuron.sigmoid
   override var bias: Double = 0.1
 
@@ -11,18 +11,21 @@ class Perceptron() extends Neuron {
 
   override def receive = run orElse addInput orElse addOutput
 
+  private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[ActorRef]) =
+    w.length == in.length && f.length == in.length
+
   def run: Receive = {
-    case Input(f, w) =>
+    case WeightedInput(f, w) =>
       featuresT = featuresT :+ f
       weightsT = weightsT :+ w
 
-      if(weightsT.length == inputNodes.length && featuresT.length == inputNodes.length) {
+      if(allInputsAvailable(weightsT, featuresT, inputs)) {
         val output = activationFunction(weightsT.zip(featuresT).map(x => x._1 * x._2).sum + bias)
 
         featuresT = Seq()
         weightsT = Seq()
 
-        outputNodes.foreach(_ ! Input(output, weight))
+        outputs.foreach(_ ! Input(output))
       }
   }
 }

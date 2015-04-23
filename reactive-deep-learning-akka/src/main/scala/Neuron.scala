@@ -7,10 +7,9 @@ object Neuron {
 }
 
 trait Neuron extends HasInputs with HasOutputs {
-  override var inputNodes: Seq[ActorRef] = Seq()
-  override var outputNodes: Seq[ActorRef] = Seq()
+  override var inputs: Seq[ActorRef] = Seq()
+  override var outputs: Seq[ActorRef] = Seq()
 
-  var weight: Double
   var bias: Double
   var activationFunction: Double => Double
 }

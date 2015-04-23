@@ -1,4 +1,4 @@
-import Node.{Input, AddInput, AddOutput}
+import Node.{WeightedInput, AddInput, AddOutput}
 import akka.actor.{Props, ActorSystem}
 import org.scalatest.FlatSpec
 
@@ -20,8 +20,8 @@ class PerceptronSpec extends FlatSpec {
 
     Thread.sleep(1000)
 
-    inputLayer ! Input(1.0, 2.0)
-    inputLayer ! Input(2.0, 3.0)
-    inputLayer ! Input(3.0, 4.0)
+    inputLayer ! WeightedInput(1.0, 2.0)
+    inputLayer ! WeightedInput(2.0, 3.0)
+    inputLayer ! WeightedInput(3.0, 4.0)
   }
 }
