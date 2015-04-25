@@ -3,7 +3,6 @@ import akka.actor.{Actor, ActorSystem, Props}
 
 import scala.concurrent.duration._
 
-
 object Main extends App {
 
   override def main(params: Array[String]) = {
@@ -75,7 +74,6 @@ object Main extends App {
     }))
 
     import system.dispatcher
-    system.scheduler.scheduleOnce(5 second, reaper, 'bye)
+    system.scheduler.scheduleOnce(100 seconds, reaper, 'bye)
   }
-
 }
