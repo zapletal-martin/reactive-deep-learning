@@ -15,11 +15,11 @@ object Node {
 trait Node extends Actor
 
 trait HasInputs extends Node {
-  var inputs: Seq[ActorRef]
+  var inputs: Seq[ActorRef] = Seq()
   def addInput: Receive = { case AddInput(i) => inputs = i }
 }
 
 trait HasOutputs extends Node {
-  var outputs: Seq[ActorRef]
+  var outputs: Seq[ActorRef] = Seq()
   def addOutput: Receive = { case AddOutput(o) => outputs = o }
 }

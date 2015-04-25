@@ -1,4 +1,6 @@
-import scala.math.exp
+package oo
+
+import scala.math._
 
 object Neuron {
   val simple: Double => Double = x => if(x > 0.5) 1 else 0
