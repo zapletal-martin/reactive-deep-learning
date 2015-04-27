@@ -40,8 +40,8 @@ object Main extends App {
     hiddenLayer1 ! AddInput(Seq(edgei1h1, edgei2h1, edgei3h1))
     hiddenLayer1 ! AddOutput(Seq(edgeh1o1))
 
-    hiddenLayer1 ! AddInput(Seq(edgei1h2, edgei2h2, edgei3h2))
-    hiddenLayer1 ! AddOutput(Seq(edgeh2o1))
+    hiddenLayer2 ! AddInput(Seq(edgei1h2, edgei2h2, edgei3h2))
+    hiddenLayer2 ! AddOutput(Seq(edgeh2o1))
 
     outputLayer ! AddInput(Seq(edgeh1o1, edgeh2o1))
 

@@ -38,10 +38,7 @@ object Main extends App {
       val zip2 = builder.add(Zip[Seq[Double], Seq[Double]]())
 
       val perceptron = Flow[(Seq[Double], Seq[Double])]
-        .map{ i =>
-          val activation = Neuron.sigmoid(i._1.zip(i._2).map(x => x._1 * x._2).sum) //+ bias)
-          activation
-        }
+        .map(i => Neuron.sigmoid(i._1.zip(i._2).map(x => x._1 * x._2).sum)) //+ bias)
 
       val merge = builder.add(Merge[Double](2))
 
