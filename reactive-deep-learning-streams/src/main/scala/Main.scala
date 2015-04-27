@@ -1,6 +1,7 @@
+import NeuralNetwork.Input
 import akka.actor.ActorSystem
 import akka.stream.ActorFlowMaterializer
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl._
 
 object Main extends App {
   override def main (args: Array[String]) {
@@ -10,11 +11,59 @@ object Main extends App {
 
     val sourceFile = scala.io.Source.fromFile("src/main/resources/data.csv")
 
-    Source(() => sourceFile.getLines())
+    val input = Source(() => sourceFile.getLines())
       .map{ l =>
-        val splits = l.split(",")
-        splits.map(_.toDouble)
+      val splits = l.split(",")
+      val features = splits.map(_.toDouble)
+
+      Seq(features(0), features(1), features(2))
     }
-    .runForeach(x => println(s"${x(0)}, ${x(1)}, ${x(2)}"))
+
+    val hiddenLayerWeights = Array.fill(6)(.2).toSeq
+    val hiddenLayer = Source(() => Iterator.continually(hiddenLayerWeights))
+
+    val g = FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>
+      import FlowGraph.Implicits._
+
+      val weightSplit = Flow[Seq[Double]]
+        .map { x =>
+          val firstWeights = x.zipWithIndex.filter(_._2 % 2 == 0).map(_._1)
+          val secondWeights = x.zipWithIndex.filter(_._2 % 2 != 0).map(_._1)
+
+          (firstWeights, secondWeights)
+        }
+
+      val unzip = builder.add(Unzip[Seq[Double], Seq[Double]]())
+      val zip = builder.add(Zip[Seq[Double], Seq[Double]]())
+      val zip2 = builder.add(Zip[Seq[Double], Seq[Double]]())
+
+      val perceptron = Flow[(Seq[Double], Seq[Double])]
+        .map{ i =>
+          val activation = Neuron.sigmoid(i._1.zip(i._2).map(x => x._1 * x._2).sum) //+ bias)
+          activation
+        }
+
+      val merge = builder.add(Merge[Double](2))
+
+      val zipWithIndex = builder.add(Zip[Double, Int]())
+
+      val index = Source(() => Iterator.from(0, 1))
+      val out = Sink.foreach(println)
+
+      input ~> zip.in0
+      input ~> zip2.in0
+      hiddenLayer ~> weightSplit ~> unzip.in
+                                    unzip.out0 ~> zip.in1
+                                    unzip.out1 ~> zip2.in1
+                                                  zip.out ~> perceptron ~> merge.in(0)
+                                                  zip2.out ~> perceptron ~> merge.in(1)
+                                                                           merge.out ~> zipWithIndex.in0
+                                                                           index ~> zipWithIndex.in1
+                                                                                    zipWithIndex.out ~> out
+    }
+
+    .run()
+
+    //.runForeach(println)
   }
 }
