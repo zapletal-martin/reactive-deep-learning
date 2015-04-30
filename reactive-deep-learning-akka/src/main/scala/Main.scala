@@ -1,4 +1,4 @@
-import Node.{AddInput, AddOutput}
+import Node.{Input, AddInput, AddOutput}
 import akka.actor.{Actor, ActorSystem, Props}
 
 import scala.concurrent.duration._
@@ -62,9 +62,9 @@ object Main extends App {
       .foreach{ l =>
         val splits = l.split(",")
 
-        inputLayer1 ! splits(0).toDouble
-        inputLayer2 ! splits(1).toDouble
-        inputLayer3 ! splits(2).toDouble
+        inputLayer1 ! Input(splits(0).toDouble)
+        inputLayer2 ! Input(splits(1).toDouble)
+        inputLayer3 ! Input(splits(2).toDouble)
       }
 
     val reaper = system.actorOf(Props(new Actor {

@@ -1,4 +1,4 @@
-name := "reactive-deep-learning-akka"
+name := "reactive-deep-learning-akka-cluster"
 
 version := "1.0"
 

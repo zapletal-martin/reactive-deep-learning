@@ -4,6 +4,6 @@ class InputNode() extends HasOutputs {
   override def receive = run orElse addOutput
 
   def run: Receive = {
-    case a: Double => outputs.foreach(_ ! Input(a))
+    case a: Input => outputs.foreach(_ ! a)
   }
 }
