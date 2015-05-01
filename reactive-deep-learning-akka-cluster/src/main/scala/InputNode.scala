@@ -5,7 +5,7 @@ object InputNode {
   val shardName: String = "InputNode"
 }
 
-abstract class InputNode() extends HasOutputs {
+class InputNode() extends HasOutputs {
   override def receive = run orElse addOutput
 
   def run: Receive = {

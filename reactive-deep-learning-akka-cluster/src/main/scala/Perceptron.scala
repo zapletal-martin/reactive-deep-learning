@@ -13,7 +13,7 @@ class Perceptron() extends Neuron {
   var weightsT: Seq[Double] = Seq()
   var featuresT: Seq[Double] = Seq()
 
-  override def receive = run //orElse addInput orElse addOutput
+  override def receive = run orElse addInput orElse addOutput
 
   private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[NodeId]) =
     w.length == in.length && f.length == in.length
