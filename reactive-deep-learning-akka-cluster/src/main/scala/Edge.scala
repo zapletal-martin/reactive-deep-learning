@@ -32,13 +32,13 @@ trait HasOutput extends Actor {
   def addOutput(): Receive = { case AddInput(_, o) => output = o }
 }
 
-class Edge(val in: NodeId, val out: NodeId) extends HasInput with HasOutput {
+class Edge extends HasInput with HasOutput {
   var weight: Double = 0.3
 
   override def receive: Receive = run orElse addInput orElse addOutput
 
   def run: Receive = {
     case Input(r, f) =>
-      ClusterSharding(context.system).shardRegion(Perceptron.shardName) ! WeightedInput(out, f, weight)
+      ClusterSharding(context.system).shardRegion(Perceptron.shardName) ! WeightedInput(output, f, weight)
   }
 }

@@ -12,15 +12,17 @@ object Node {
   case class AddOutputs(recipient: NodeId, output: Seq[NodeId])
 
   val idExtractor: ShardRegion.IdExtractor = {
-    case a: AddInputs => (a.recipient.toString, a)
+    case i: AddInputs => (i.recipient.toString, i)
     case o: AddOutputs => (o.recipient.toString, o)
-    case s: WeightedInput => (s.feature.toString, s)
+    case s: WeightedInput => (s.recipient.toString, s)
+    case s: Input => (s.recipient.toString, s)
   }
 
   val shardResolver: ShardRegion.ShardResolver = {
-    case a: AddInputs => (a.recipient.hashCode % 100).toString
+    case i: AddInputs => (i.recipient.hashCode % 100).toString
     case o: AddOutputs => (o.recipient.hashCode % 100).toString
-    case s: WeightedInput => (s.feature.hashCode % 100).toString
+    case s: WeightedInput => (s.recipient.hashCode % 100).toString
+    case s: Input => (s.recipient.hashCode % 100).toString
   }
 }
 

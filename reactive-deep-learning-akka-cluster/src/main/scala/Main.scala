@@ -49,7 +49,7 @@ object Main extends App {
           OutputNode.shardName, Some(Props[OutputNode]), None, false, Node.idExtractor, Node.shardResolver)
 
         val edges = ClusterSharding(system).start(
-          OutputNode.shardName, Some(Props[OutputNode]), None, false, Node.idExtractor, Node.shardResolver)
+          Edge.shardName, Some(Props[Edge]), None, false, Edge.idExtractor, Edge.shardResolver)
 
         if(port == "0") {
           //Input layer to hidden layer edges.
@@ -86,19 +86,19 @@ object Main extends App {
           nodes ! AddInputs("n-2-1", Seq("e-1-1-2-1", "e-1-2-2-1", "e-1-3-2-1"))
           nodes ! AddOutputs("n-2-1", Seq("e-2-1-3-1"))
 
-          outputNodes ! AddInputs("n-2-2", Seq("e-1-1-2-2", "e-1-2-2-2", "e-1-3-2-2"))
-          outputNodes ! AddOutputs("n-2-2", Seq("e-2-2-3-1"))
+          nodes ! AddInputs("n-2-2", Seq("e-1-1-2-2", "e-1-2-2-2", "e-1-3-2-2"))
+          nodes ! AddOutputs("n-2-2", Seq("e-2-2-3-1"))
 
-          nodes ! AddInputs("n-3-1", Seq("e-2-1-3-1", "e-2-2-3-1"))
+          outputNodes ! AddInputs("n-3-1", Seq("e-2-1-3-1", "e-2-2-3-1"))
 
           scala.io.Source.fromFile("src/main/resources/data.csv")
             .getLines()
             .foreach { l =>
             val splits = l.split(",")
 
-            nodes ! Input("n-1-1", splits(0).toDouble)
-            nodes ! Input("n-1-2", splits(1).toDouble)
-            nodes ! Input("n-1-3", splits(2).toDouble)
+            inputNodes ! Input("n-1-1", splits(0).toDouble)
+            inputNodes ! Input("n-1-2", splits(1).toDouble)
+            inputNodes ! Input("n-1-3", splits(2).toDouble)
           }
 
           val reaper = system.actorOf(Props(new Actor {
