@@ -1,23 +1,7 @@
 import Node._
-import akka.contrib.pattern.{ClusterSharding, ShardRegion}
+import akka.contrib.pattern.ClusterSharding
 
 object Perceptron {
-
-  val idExtractor: ShardRegion.IdExtractor = {
-    case a: AddInput => (a.recipient.toString, a)
-    case s: WeightedInput => (s.feature.toString, s)
-    case s: Input => {
-      println("IDEXTRA")
-      (s.recipient.toString, s)
-    }
-  }
-
-  val shardResolver: ShardRegion.ShardResolver = {
-    case a: AddInput => (math.abs(a.recipient.hashCode) % 100).toString
-    case s: WeightedInput => (math.abs(s.feature.hashCode) % 100).toString
-    case s: Input => (math.abs(s.recipient.hashCode) % 100).toString
-  }
-
   val shardName: String = "Perceptron"
 }
 
@@ -48,7 +32,5 @@ class Perceptron() extends Neuron {
         val shardRegion = ClusterSharding(context.system).shardRegion(Perceptron.shardName)
         outputs.foreach(shardRegion ! Input(_, output))
       }
-
-    case a@_ => println(s"HOSE $a")
   }
 }

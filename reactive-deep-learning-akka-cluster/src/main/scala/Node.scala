@@ -1,5 +1,6 @@
 import Node.{NodeId, AddInput, AddOutput}
 import akka.actor._
+import akka.contrib.pattern.ShardRegion
 
 object Node {
   type NodeId = String
@@ -9,6 +10,18 @@ object Node {
 
   case class AddInput(recipient: NodeId, input: Seq[NodeId])
   case class AddOutput(recipient: NodeId, output: Seq[NodeId])
+
+  val idExtractor: ShardRegion.IdExtractor = {
+    case a: AddInput => (a.recipient.toString, a)
+    case o: AddOutput => (o.recipient.toString, o)
+    case s: WeightedInput => (s.feature.toString, s)
+  }
+
+  val shardResolver: ShardRegion.ShardResolver = {
+    case a: AddInput => (a.recipient.hashCode % 100).toString
+    case o: AddOutput => (o.recipient.hashCode % 100).toString
+    case s: WeightedInput => (s.feature.hashCode % 100).toString
+  }
 }
 
 trait Node extends Actor

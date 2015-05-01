@@ -1,7 +1,10 @@
 import java.text.SimpleDateFormat
 import java.util.Date
-
 import Node.WeightedInput
+
+object OutputNode {
+  val shardName: String = "OutputNode"
+}
 
 class OutputNode() extends HasInputs {
   var i = 0
