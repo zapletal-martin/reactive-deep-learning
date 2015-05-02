@@ -1,8 +1,10 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 import Node.WeightedInput
+import akka.actor.Props
 
 object OutputNode {
+  def props(): Props = Props[OutputNode]
   val shardName: String = "OutputNode"
 }
 

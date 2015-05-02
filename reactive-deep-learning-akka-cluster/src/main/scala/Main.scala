@@ -41,16 +41,16 @@ object Main extends App {
           ActorPath.fromString("akka.tcp://ClusterSystem@127.0.0.1:2551/user/store"))
 
         val nodes = ClusterSharding(system).start(
-          Perceptron.shardName, Some(Props[Perceptron]), None, false, Node.idExtractor, Node.shardResolver)
+          Perceptron.shardName, Some(Perceptron.props), None, false, Node.idExtractor, Node.shardResolver)
 
         val inputNodes = ClusterSharding(system).start(
-          InputNode.shardName, Some(Props[InputNode]), None, false, Node.idExtractor, Node.shardResolver)
+          InputNode.shardName, Some(InputNode.props), None, false, Node.idExtractor, Node.shardResolver)
 
         val outputNodes = ClusterSharding(system).start(
-          OutputNode.shardName, Some(Props[OutputNode]), None, false, Node.idExtractor, Node.shardResolver)
+          OutputNode.shardName, Some(OutputNode.props), None, false, Node.idExtractor, Node.shardResolver)
 
         val edges = ClusterSharding(system).start(
-          Edge.shardName, Some(Props[Edge]), None, false, Edge.idExtractor, Edge.shardResolver)
+          Edge.shardName, Some(Edge.props), None, false, Edge.idExtractor, Edge.shardResolver)
 
         if(port == "0") {
           implicit val t = Timeout(10 seconds)

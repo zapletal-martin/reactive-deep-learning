@@ -1,6 +1,6 @@
 import Edge.{AddOutput, AddInput}
 import Node.{NodeId, Input, WeightedInput}
-import akka.actor.Actor
+import akka.actor.{Props, Actor}
 import akka.contrib.pattern.{ShardRegion, ClusterSharding}
 import akka.remote.Ack
 
@@ -20,6 +20,7 @@ object Edge {
     case s: Input => (s.recipient.hashCode % 100).toString
   }
 
+  def props(): Props = Props[Edge]
   val shardName: String = "Edge"
 }
 

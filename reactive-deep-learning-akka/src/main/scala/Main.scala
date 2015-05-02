@@ -27,26 +27,26 @@ object Main extends App {
     val d = t.duration
 
     //Input layer nodes.
-    val inputLayer1 = system.actorOf(Props[InputNode])
-    val inputLayer2 = system.actorOf(Props[InputNode])
-    val inputLayer3 = system.actorOf(Props[InputNode])
+    val inputLayer1 = system.actorOf(InputNode.props)
+    val inputLayer2 = system.actorOf(InputNode.props)
+    val inputLayer3 = system.actorOf(InputNode.props)
 
     //Hidden layer nodes.
-    val hiddenLayer1 = system.actorOf(Props[Perceptron])
-    val hiddenLayer2 = system.actorOf(Props[Perceptron])
+    val hiddenLayer1 = system.actorOf(Perceptron.props)
+    val hiddenLayer2 = system.actorOf(Perceptron.props)
 
     //Output layer nodes.
     val outputLayer = system.actorOf(Props[OutputNode])
 
-    val edgei1h1 = system.actorOf(Props[Edge])
-    val edgei1h2 = system.actorOf(Props[Edge])
-    val edgei2h1 = system.actorOf(Props[Edge])
-    val edgei2h2 = system.actorOf(Props[Edge])
-    val edgei3h1 = system.actorOf(Props[Edge])
-    val edgei3h2 = system.actorOf(Props[Edge])
+    val edgei1h1 = system.actorOf(Edge.props)
+    val edgei1h2 = system.actorOf(Edge.props)
+    val edgei2h1 = system.actorOf(Edge.props)
+    val edgei2h2 = system.actorOf(Edge.props)
+    val edgei3h1 = system.actorOf(Edge.props)
+    val edgei3h2 = system.actorOf(Edge.props)
 
-    val edgeh1o1 = system.actorOf(Props[Edge])
-    val edgeh2o1 = system.actorOf(Props[Edge])
+    val edgeh1o1 = system.actorOf(Edge.props)
+    val edgeh2o1 = system.actorOf(Edge.props)
 
     //Input layer to hidden layer edges.
     Await.result(edgei1h1 ? AddInput(inputLayer1), d)

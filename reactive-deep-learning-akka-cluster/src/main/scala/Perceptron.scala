@@ -1,7 +1,9 @@
 import Node._
+import akka.actor.Props
 import akka.contrib.pattern.ClusterSharding
 
 object Perceptron {
+  def props(): Props = Props[Perceptron]
   val shardName: String = "Perceptron"
 }
 

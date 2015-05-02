@@ -1,7 +1,9 @@
 import Node.Input
+import akka.actor.Props
 import akka.contrib.pattern.ClusterSharding
 
 object InputNode {
+  def props(): Props = Props[InputNode]
   val shardName: String = "InputNode"
 }
 

@@ -1,10 +1,12 @@
 import Node.{WeightedInput, Input, Ack}
 import Edge.{AddOutput, AddInput}
-import akka.actor.{ActorRef, Actor}
+import akka.actor.{Props, ActorRef, Actor}
 
 object Edge {
   case class AddInput(input: ActorRef)
   case class AddOutput(output: ActorRef)
+
+  def props(): Props = Props[Edge]
 }
 
 trait HasInput extends Actor {

@@ -1,5 +1,9 @@
 import Node._
-import akka.actor.ActorRef
+import akka.actor.{Props, ActorRef}
+
+object Perceptron {
+  def props(): Props = Props[Perceptron]
+}
 
 class Perceptron() extends Neuron {
 
