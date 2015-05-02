@@ -1,10 +1,36 @@
-import Node.{WeightedInput, Input}
+import Node.{WeightedInput, Input, Ack}
+import Edge.{AddOutput, AddInput}
 import akka.actor.{ActorRef, Actor}
 
-class Edge(val in: ActorRef, val out: ActorRef) extends Actor {
+object Edge {
+  case class AddInput(input: ActorRef)
+  case class AddOutput(output: ActorRef)
+}
+
+trait HasInput extends Actor {
+  var input: ActorRef = _
+  def addInput(): Receive = {
+    case AddInput(i) =>
+      input = i
+      sender() ! Ack
+  }
+}
+
+trait HasOutput extends Actor {
+  var output: ActorRef = _
+  def addOutput(): Receive = {
+    case AddOutput(o) =>
+      output = o
+      sender() ! Ack
+  }
+}
+
+class Edge extends HasInput with HasOutput {
   var weight: Double = 0.3
 
-  override def receive: Receive = {
-    case Input(f) => out ! WeightedInput(f, weight)
+  override def receive: Receive = run orElse addInput orElse addOutput
+
+  def run: Receive = {
+    case Input(f) => output ! WeightedInput(f, weight)
   }
 }

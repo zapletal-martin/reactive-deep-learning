@@ -1,12 +1,30 @@
-import Node.{Input, AddInput, AddOutput}
-import akka.actor.{Actor, ActorSystem, Props}
+import Node.{Input, AddInputs, AddOutputs}
+import Edge.{AddInput, AddOutput}
+import akka.actor.{ActorSystem, Props}
+import akka.util.Timeout
+import akka.pattern.ask
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object Main extends App {
 
+  //**************************************
+  // I-----
+  //  \    |
+  //   ----H
+  //  / \ / \
+  // I   -   O
+  //  \ / \ /
+  //   ----H
+  //  /    |
+  // I-----
+  //**************************************
   override def main(params: Array[String]) = {
-    val system = ActorSystem("test")
+    val system = ActorSystem("akka")
+
+    implicit val t = Timeout(10 seconds)
+    val d = t.duration
 
     //Input layer nodes.
     val inputLayer1 = system.actorOf(Props[InputNode])
@@ -20,42 +38,54 @@ object Main extends App {
     //Output layer nodes.
     val outputLayer = system.actorOf(Props[OutputNode])
 
+    val edgei1h1 = system.actorOf(Props[Edge])
+    val edgei1h2 = system.actorOf(Props[Edge])
+    val edgei2h1 = system.actorOf(Props[Edge])
+    val edgei2h2 = system.actorOf(Props[Edge])
+    val edgei3h1 = system.actorOf(Props[Edge])
+    val edgei3h2 = system.actorOf(Props[Edge])
+
+    val edgeh1o1 = system.actorOf(Props[Edge])
+    val edgeh2o1 = system.actorOf(Props[Edge])
+
     //Input layer to hidden layer edges.
-    val edgei1h1 = system.actorOf(Props(new Edge(inputLayer1, hiddenLayer1)))
-    val edgei1h2 = system.actorOf(Props(new Edge(inputLayer1, hiddenLayer2)))
-    val edgei2h1 = system.actorOf(Props(new Edge(inputLayer2, hiddenLayer1)))
-    val edgei2h2 = system.actorOf(Props(new Edge(inputLayer2, hiddenLayer2)))
-    val edgei3h1 = system.actorOf(Props(new Edge(inputLayer3, hiddenLayer1)))
-    val edgei3h2 = system.actorOf(Props(new Edge(inputLayer3, hiddenLayer2)))
+    Await.result(edgei1h1 ? AddInput(inputLayer1), d)
+    Await.result(edgei1h1 ? AddOutput(hiddenLayer1), d)
+
+    Await.result(edgei1h2 ? AddInput(inputLayer1), d)
+    Await.result(edgei1h2 ? AddOutput(hiddenLayer2), d)
+
+    Await.result(edgei2h1 ? AddInput(inputLayer2), d)
+    Await.result(edgei2h1 ? AddOutput(hiddenLayer1), d)
+
+    Await.result(edgei2h2 ? AddInput(inputLayer2), d)
+    Await.result(edgei2h2 ? AddOutput(hiddenLayer2), d)
+
+    Await.result(edgei3h1 ? AddInput(inputLayer3), d)
+    Await.result(edgei3h1 ? AddOutput(hiddenLayer1), d)
+
+    Await.result(edgei3h2 ? AddInput(inputLayer3), d)
+    Await.result(edgei3h2 ? AddOutput(hiddenLayer2), d)
 
     //Hidden layer to output layer edges.
-    val edgeh1o1 = system.actorOf(Props(new Edge(hiddenLayer1, outputLayer)))
-    val edgeh2o1 = system.actorOf(Props(new Edge(hiddenLayer2, outputLayer)))
+    Await.result(edgeh1o1 ? AddInput(hiddenLayer1), d)
+    Await.result(edgeh1o1 ? AddOutput(outputLayer), d)
+
+    Await.result(edgeh2o1 ? AddInput(hiddenLayer2), d)
+    Await.result(edgeh2o1 ? AddOutput(outputLayer), d)
 
     //Linking edges to nodes.
-    inputLayer1 ! AddOutput(Seq(edgei1h1, edgei1h2))
-    inputLayer2 ! AddOutput(Seq(edgei2h1, edgei2h2))
-    inputLayer3 ! AddOutput(Seq(edgei3h1, edgei1h2))
+    Await.result(inputLayer1 ? AddOutputs(Seq(edgei1h1, edgei1h2)), d)
+    Await.result(inputLayer2 ? AddOutputs(Seq(edgei2h1, edgei2h2)), d)
+    Await.result(inputLayer3 ? AddOutputs(Seq(edgei3h1, edgei1h2)), d)
 
-    hiddenLayer1 ! AddInput(Seq(edgei1h1, edgei2h1, edgei3h1))
-    hiddenLayer1 ! AddOutput(Seq(edgeh1o1))
+    Await.result(hiddenLayer1 ? AddInputs(Seq(edgei1h1, edgei2h1, edgei3h1)), d)
+    Await.result(hiddenLayer1 ? AddOutputs(Seq(edgeh1o1)), d)
 
-    hiddenLayer2 ! AddInput(Seq(edgei1h2, edgei2h2, edgei3h2))
-    hiddenLayer2 ! AddOutput(Seq(edgeh2o1))
+    Await.result(hiddenLayer2 ? AddInputs(Seq(edgei1h2, edgei2h2, edgei3h2)), d)
+    Await.result(hiddenLayer2 ? AddOutputs(Seq(edgeh2o1)), d)
 
-    outputLayer ! AddInput(Seq(edgeh1o1, edgeh2o1))
-
-    //**************************************
-    // I-----
-    //  \    |
-    //   ----H
-    //  / \ / \
-    // I   -   O
-    //  \ / \ /
-    //   ----H
-    //  /    |
-    // I-----
-    //**************************************
+    Await.result(outputLayer ? AddInputs(Seq(edgeh1o1, edgeh2o1)), d)
 
     scala.io.Source.fromFile("src/main/resources/data.csv")
       .getLines()
@@ -66,14 +96,5 @@ object Main extends App {
         inputLayer2 ! Input(splits(1).toDouble)
         inputLayer3 ! Input(splits(2).toDouble)
       }
-
-    val reaper = system.actorOf(Props(new Actor {
-      override def receive: Receive = {
-        case _ => system.terminate()
-      }
-    }))
-
-    import system.dispatcher
-    system.scheduler.scheduleOnce(100 seconds, reaper, 'bye)
   }
 }

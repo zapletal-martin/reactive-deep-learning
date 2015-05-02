@@ -55,7 +55,6 @@ object Main extends App {
         if(port == "0") {
           implicit val t = Timeout(10 seconds)
           val d = t.duration
-          //implicit val ec = implicits.
 
           //Input layer to hidden layer edges.
           Await.result(edges ? AddInput("e-1-1-2-1", "n-1-1"), d)
@@ -96,7 +95,6 @@ object Main extends App {
 
           Await.result(outputNodes ? AddInputs("o-3-1", Seq("e-2-1-3-1", "e-2-2-3-1")), d)
 
-          Thread.sleep(5000)
           scala.io.Source.fromFile("src/main/resources/data.csv")
             .getLines()
             .foreach { l =>
@@ -106,15 +104,6 @@ object Main extends App {
             inputNodes ! Input("n-1-2", splits(1).toDouble)
             inputNodes ! Input("n-1-3", splits(2).toDouble)
           }
-
-          val reaper = system.actorOf(Props(new Actor {
-            override def receive: Receive = {
-              case _ => system.terminate()
-            }
-          }))
-
-          import system.dispatcher
-          system.scheduler.scheduleOnce(1000 seconds, reaper, 'bye)
         }
     }
   }

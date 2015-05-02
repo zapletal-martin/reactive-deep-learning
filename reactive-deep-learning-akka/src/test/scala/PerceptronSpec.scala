@@ -1,4 +1,4 @@
-import Node.{WeightedInput, AddInput, AddOutput}
+import Node.{WeightedInput, AddInputs, AddOutputs}
 import akka.actor.{Props, ActorSystem}
 import org.scalatest.FlatSpec
 
@@ -11,12 +11,12 @@ class PerceptronSpec extends FlatSpec {
     val hiddenLayer = system.actorOf(Props[Perceptron])
     val outputLayer = system.actorOf(Props[OutputNode])
 
-    inputLayer ! AddOutput(Seq(hiddenLayer))
+    inputLayer ! AddOutputs(Seq(hiddenLayer))
 
-    hiddenLayer ! AddInput(Seq(inputLayer))
-    hiddenLayer ! AddOutput(Seq(outputLayer))
+    hiddenLayer ! AddInputs(Seq(inputLayer))
+    hiddenLayer ! AddOutputs(Seq(outputLayer))
 
-    outputLayer ! AddInput(Seq(hiddenLayer))
+    outputLayer ! AddInputs(Seq(hiddenLayer))
 
     Thread.sleep(1000)
 
