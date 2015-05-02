@@ -18,6 +18,8 @@ class Perceptron() extends Neuron {
   private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[NodeId]) =
     w.length == in.length && f.length == in.length
 
+  val shardRegion = ClusterSharding(context.system).shardRegion(Edge.shardName)
+
   def run: Receive = {
     case WeightedInput(_, f, w) =>
       featuresT = featuresT :+ f
@@ -29,7 +31,6 @@ class Perceptron() extends Neuron {
         featuresT = Seq()
         weightsT = Seq()
 
-        val shardRegion = ClusterSharding(context.system).shardRegion(Perceptron.shardName)
         outputs.foreach(shardRegion ! Input(_, output))
       }
   }

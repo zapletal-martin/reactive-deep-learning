@@ -1,4 +1,4 @@
-import Edge.AddInput
+import Edge.{AddOutput, AddInput}
 import Node.{NodeId, Input, WeightedInput}
 import akka.actor.Actor
 import akka.contrib.pattern.{ShardRegion, ClusterSharding}
@@ -29,7 +29,7 @@ trait HasInput extends Actor {
 
 trait HasOutput extends Actor {
   var output: NodeId = _
-  def addOutput(): Receive = { case AddInput(_, o) => output = o }
+  def addOutput(): Receive = { case AddOutput(_, o) => output = o }
 }
 
 class Edge extends HasInput with HasOutput {
@@ -37,8 +37,14 @@ class Edge extends HasInput with HasOutput {
 
   override def receive: Receive = run orElse addInput orElse addOutput
 
+  val shardRegion = ClusterSharding(context.system).shardRegion(Perceptron.shardName)
+  val shardRegionLastLayer = ClusterSharding(context.system).shardRegion(OutputNode.shardName)
+
   def run: Receive = {
     case Input(r, f) =>
-      ClusterSharding(context.system).shardRegion(Perceptron.shardName) ! WeightedInput(output, f, weight)
+      if(output.head == 'o')
+        shardRegionLastLayer ! WeightedInput(output, f, weight)
+      else
+        shardRegion ! WeightedInput(output, f, weight)
   }
 }

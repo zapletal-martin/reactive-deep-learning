@@ -60,7 +60,7 @@ object Main extends App {
           edges ! AddOutput("e-1-2-2-1", "n-2-1")
 
           edges ! AddInput("e-1-3-2-1", "n-1-3")
-          edges ! AddOutput("e-1-1-2-3", "n-2-1")
+          edges ! AddOutput("e-1-3-2-1", "n-2-1")
 
           edges ! AddInput("e-1-1-2-2", "n-1-1")
           edges ! AddOutput("e-1-1-2-2", "n-2-2")
@@ -73,10 +73,10 @@ object Main extends App {
 
           //Hidden layer to output layer edges.
           edges ! AddInput("e-2-1-3-1", "n-2-1")
-          edges ! AddOutput("e-2-1-3-1", "n-3-1")
+          edges ! AddOutput("e-2-1-3-1", "o-3-1")
 
           edges ! AddInput("e-2-2-3-1", "n-2-2")
-          edges ! AddOutput("e-2-2-3-1", "n-3-1")
+          edges ! AddOutput("e-2-2-3-1", "o-3-1")
 
           //Linking edges to nodes.
           inputNodes ! AddOutputs("n-1-1", Seq("e-1-1-2-1", "e-1-1-2-2"))
@@ -89,8 +89,9 @@ object Main extends App {
           nodes ! AddInputs("n-2-2", Seq("e-1-1-2-2", "e-1-2-2-2", "e-1-3-2-2"))
           nodes ! AddOutputs("n-2-2", Seq("e-2-2-3-1"))
 
-          outputNodes ! AddInputs("n-3-1", Seq("e-2-1-3-1", "e-2-2-3-1"))
+          outputNodes ! AddInputs("o-3-1", Seq("e-2-1-3-1", "e-2-2-3-1"))
 
+          Thread.sleep(5000)
           scala.io.Source.fromFile("src/main/resources/data.csv")
             .getLines()
             .foreach { l =>
