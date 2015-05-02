@@ -18,12 +18,12 @@ class Perceptron extends Neuron {
     weightsT = weightsT :+ in.weight
 
     if(allInputsAvailable(weightsT, featuresT, inputs)) {
-      val output = activationFunction(weightsT.zip(featuresT).map(x => x._1 * x._2).sum + bias)
+      val activation = activationFunction(weightsT.zip(featuresT).map(x => x._1 * x._2).sum + bias)
 
       featuresT = Seq()
       weightsT = Seq()
 
-      outputs.foreach(_.run(Input(output)))
+      outputs.foreach(_.run(Input(activation)))
     }
   }
 }
