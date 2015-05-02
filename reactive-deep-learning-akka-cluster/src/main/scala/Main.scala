@@ -7,6 +7,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import akka.pattern.ask
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object Main extends App {
@@ -52,44 +53,48 @@ object Main extends App {
           Edge.shardName, Some(Props[Edge]), None, false, Edge.idExtractor, Edge.shardResolver)
 
         if(port == "0") {
+          implicit val t = Timeout(10 seconds)
+          val d = t.duration
+          //implicit val ec = implicits.
+
           //Input layer to hidden layer edges.
-          edges ! AddInput("e-1-1-2-1", "n-1-1")
-          edges ! AddOutput("e-1-1-2-1", "n-2-1")
+          Await.result(edges ? AddInput("e-1-1-2-1", "n-1-1"), d)
+          Await.result(edges ? AddOutput("e-1-1-2-1", "n-2-1"), d)
 
-          edges ! AddInput("e-1-2-2-1", "n-1-2")
-          edges ! AddOutput("e-1-2-2-1", "n-2-1")
+          Await.result(edges ? AddInput("e-1-2-2-1", "n-1-2"), d)
+          Await.result(edges ? AddOutput("e-1-2-2-1", "n-2-1"), d)
 
-          edges ! AddInput("e-1-3-2-1", "n-1-3")
-          edges ! AddOutput("e-1-3-2-1", "n-2-1")
+          Await.result(edges ? AddInput("e-1-3-2-1", "n-1-3"), d)
+          Await.result(edges ? AddOutput("e-1-3-2-1", "n-2-1"), d)
 
-          edges ! AddInput("e-1-1-2-2", "n-1-1")
-          edges ! AddOutput("e-1-1-2-2", "n-2-2")
+          Await.result(edges ? AddInput("e-1-1-2-2", "n-1-1"), d)
+          Await.result(edges ? AddOutput("e-1-1-2-2", "n-2-2"), d)
 
-          edges ! AddInput("e-1-2-2-2", "n-1-2")
-          edges ! AddOutput("e-1-2-2-2", "n-2-2")
+          Await.result(edges ? AddInput("e-1-2-2-2", "n-1-2"), d)
+          Await.result(edges ? AddOutput("e-1-2-2-2", "n-2-2"), d)
 
-          edges ! AddInput("e-1-3-2-2", "n-1-3")
-          edges ! AddOutput("e-1-3-2-2", "n-2-2")
+          Await.result(edges ? AddInput("e-1-3-2-2", "n-1-3"), d)
+          Await.result(edges ? AddOutput("e-1-3-2-2", "n-2-2"), d)
 
           //Hidden layer to output layer edges.
-          edges ! AddInput("e-2-1-3-1", "n-2-1")
-          edges ! AddOutput("e-2-1-3-1", "o-3-1")
+          Await.result(edges ? AddInput("e-2-1-3-1", "n-2-1"), d)
+          Await.result(edges ? AddOutput("e-2-1-3-1", "o-3-1"), d)
 
-          edges ! AddInput("e-2-2-3-1", "n-2-2")
-          edges ! AddOutput("e-2-2-3-1", "o-3-1")
+          Await.result(edges ? AddInput("e-2-2-3-1", "n-2-2"), d)
+          Await.result(edges ? AddOutput("e-2-2-3-1", "o-3-1"), d)
 
           //Linking edges to nodes.
-          inputNodes ! AddOutputs("n-1-1", Seq("e-1-1-2-1", "e-1-1-2-2"))
-          inputNodes ! AddOutputs("n-1-2", Seq("e-1-2-2-1", "e-1-2-2-2"))
-          inputNodes ! AddOutputs("n-1-3", Seq("e-1-3-2-1", "e-1-3-2-2"))
+          Await.result(inputNodes ? AddOutputs("n-1-1", Seq("e-1-1-2-1", "e-1-1-2-2")), d)
+          Await.result(inputNodes ? AddOutputs("n-1-2", Seq("e-1-2-2-1", "e-1-2-2-2")), d)
+          Await.result(inputNodes ? AddOutputs("n-1-3", Seq("e-1-3-2-1", "e-1-3-2-2")), d)
 
-          nodes ! AddInputs("n-2-1", Seq("e-1-1-2-1", "e-1-2-2-1", "e-1-3-2-1"))
-          nodes ! AddOutputs("n-2-1", Seq("e-2-1-3-1"))
+          Await.result(nodes ? AddInputs("n-2-1", Seq("e-1-1-2-1", "e-1-2-2-1", "e-1-3-2-1")), d)
+          Await.result(nodes ? AddOutputs("n-2-1", Seq("e-2-1-3-1")), d)
 
-          nodes ! AddInputs("n-2-2", Seq("e-1-1-2-2", "e-1-2-2-2", "e-1-3-2-2"))
-          nodes ! AddOutputs("n-2-2", Seq("e-2-2-3-1"))
+          Await.result(nodes ? AddInputs("n-2-2", Seq("e-1-1-2-2", "e-1-2-2-2", "e-1-3-2-2")), d)
+          Await.result(nodes ? AddOutputs("n-2-2", Seq("e-2-2-3-1")), d)
 
-          outputNodes ! AddInputs("o-3-1", Seq("e-2-1-3-1", "e-2-2-3-1"))
+          Await.result(outputNodes ? AddInputs("o-3-1", Seq("e-2-1-3-1", "e-2-2-3-1")), d)
 
           Thread.sleep(5000)
           scala.io.Source.fromFile("src/main/resources/data.csv")
@@ -109,7 +114,7 @@ object Main extends App {
           }))
 
           import system.dispatcher
-          system.scheduler.scheduleOnce(100 seconds, reaper, 'bye)
+          system.scheduler.scheduleOnce(1000 seconds, reaper, 'bye)
         }
     }
   }

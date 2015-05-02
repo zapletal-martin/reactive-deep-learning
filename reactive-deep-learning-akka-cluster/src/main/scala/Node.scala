@@ -1,4 +1,4 @@
-import Node.{NodeId, AddInputs, AddOutputs}
+import Node.{Ack, NodeId, AddInputs, AddOutputs}
 import akka.actor._
 import akka.contrib.pattern.ShardRegion
 
@@ -10,6 +10,7 @@ object Node {
 
   case class AddInputs(recipient: NodeId, input: Seq[NodeId])
   case class AddOutputs(recipient: NodeId, output: Seq[NodeId])
+  case object Ack
 
   val idExtractor: ShardRegion.IdExtractor = {
     case i: AddInputs => (i.recipient.toString, i)
@@ -30,10 +31,18 @@ trait Node extends Actor
 
 trait HasInputs extends Node {
   var inputs: Seq[NodeId] = Seq()
-  def addInput(): Receive = { case AddInputs(_, i) => inputs = i }
+  def addInput(): Receive = {
+    case AddInputs(_, i) =>
+      inputs = i
+      sender() ! Ack
+  }
 }
 
 trait HasOutputs extends Node {
   var outputs: Seq[NodeId] = Seq()
-  def addOutput(): Receive = { case AddOutputs(_, o) => outputs = o }
+  def addOutput(): Receive = {
+    case AddOutputs(_, o) =>
+      outputs = o
+      sender() ! Ack
+  }
 }

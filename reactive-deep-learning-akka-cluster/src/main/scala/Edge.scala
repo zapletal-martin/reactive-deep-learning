@@ -2,6 +2,7 @@ import Edge.{AddOutput, AddInput}
 import Node.{NodeId, Input, WeightedInput}
 import akka.actor.Actor
 import akka.contrib.pattern.{ShardRegion, ClusterSharding}
+import akka.remote.Ack
 
 object Edge {
   case class AddInput(recipient: NodeId, input: NodeId)
@@ -24,12 +25,20 @@ object Edge {
 
 trait HasInput extends Actor {
   var input: NodeId = _
-  def addInput(): Receive = { case AddInput(_, i) => input = i }
+  def addInput(): Receive = {
+    case AddInput(_, i) =>
+      input = i
+      sender() ! Ack
+  }
 }
 
 trait HasOutput extends Actor {
   var output: NodeId = _
-  def addOutput(): Receive = { case AddOutput(_, o) => output = o }
+  def addOutput(): Receive = {
+    case AddOutput(_, o) =>
+      output = o
+      sender() ! Ack
+  }
 }
 
 class Edge extends HasInput with HasOutput {
