@@ -15,30 +15,53 @@ object Main extends App {
     //Output layer nodes.
     val outputLayer = new OutputNode()
 
+    val edgei1h1 = new Edge()
+    val edgei1h2 = new Edge()
+    val edgei2h1 = new Edge()
+    val edgei2h2 = new Edge()
+    val edgei3h1 = new Edge()
+    val edgei3h2 = new Edge()
+    val edgeh1o1 = new Edge()
+    val edgeh2o1 = new Edge()
+
     //Input layer to hidden layer edges.
-    val edgei1h1 = new Edge(inputLayer1, hiddenLayer1)
-    val edgei1h2 = new Edge(inputLayer1, hiddenLayer2)
-    val edgei2h1 = new Edge(inputLayer2, hiddenLayer1)
-    val edgei2h2 = new Edge(inputLayer2, hiddenLayer2)
-    val edgei3h1 = new Edge(inputLayer3, hiddenLayer1)
-    val edgei3h2 = new Edge(inputLayer3, hiddenLayer2)
+    edgei1h1.addInput(inputLayer1)
+    edgei1h1.addOutput(hiddenLayer1)
+
+    edgei1h2.addInput(inputLayer1)
+    edgei1h2.addOutput(hiddenLayer2)
+
+    edgei2h1.addInput(inputLayer2)
+    edgei2h1.addOutput(hiddenLayer1)
+
+    edgei2h2.addInput(inputLayer2)
+    edgei2h2.addOutput(hiddenLayer2)
+
+    edgei3h1.addInput(inputLayer3)
+    edgei3h1.addOutput(hiddenLayer1)
+
+    edgei3h2.addInput(inputLayer3)
+    edgei3h2.addOutput(hiddenLayer2)
 
     //Hidden layer to output layer edges.
-    val edgeh1o1 = new Edge(hiddenLayer1, outputLayer)
-    val edgeh2o1 = new Edge(hiddenLayer2, outputLayer)
+    edgeh1o1.addInput(hiddenLayer1)
+    edgeh1o1.addOutput(outputLayer)
 
+    edgeh2o1.addInput(hiddenLayer2)
+    edgeh2o1.addOutput(outputLayer)
+    
     //Linking edges to nodes.
-    inputLayer1.addOutput(Seq(edgei1h1, edgei1h2))
-    inputLayer2.addOutput(Seq(edgei2h1, edgei2h2))
-    inputLayer3.addOutput(Seq(edgei3h1, edgei1h2))
+    inputLayer1.addOutputs(Seq(edgei1h1, edgei1h2))
+    inputLayer2.addOutputs(Seq(edgei2h1, edgei2h2))
+    inputLayer3.addOutputs(Seq(edgei3h1, edgei1h2))
 
-    hiddenLayer1.addInput(Seq(edgei1h1, edgei2h1, edgei3h1))
-    hiddenLayer1.addOutput(Seq(edgeh1o1))
+    hiddenLayer1.addInputs(Seq(edgei1h1, edgei2h1, edgei3h1))
+    hiddenLayer1.addOutputs(Seq(edgeh1o1))
 
-    hiddenLayer2.addInput(Seq(edgei1h2, edgei2h2, edgei3h2))
-    hiddenLayer2.addOutput(Seq(edgeh2o1))
+    hiddenLayer2.addInputs(Seq(edgei1h2, edgei2h2, edgei3h2))
+    hiddenLayer2.addOutputs(Seq(edgeh2o1))
 
-    outputLayer.addInput(Seq(edgeh1o1, edgeh2o1))
+    outputLayer.addInputs(Seq(edgeh1o1, edgeh2o1))
 
     scala.io.Source.fromFile("src/main/resources/data.csv")
       .getLines()

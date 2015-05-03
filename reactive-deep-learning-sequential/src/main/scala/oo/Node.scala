@@ -13,10 +13,10 @@ trait Node {
 
 trait HasInputs extends Node {
   var inputs: Seq[Edge] = Seq()
-  def addInput(i: Seq[Edge]): Unit = inputs = i
+  def addInputs(i: Seq[Edge]): Unit = inputs = i
 }
 
 trait HasOutputs extends Node {
   var outputs: Seq[Edge] = Seq()
-  def addOutput(i: Seq[Edge]): Unit = outputs = i
+  def addOutputs(i: Seq[Edge]): Unit = outputs = i
 }
