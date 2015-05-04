@@ -49,7 +49,7 @@ object Main extends App {
 
     edgeh2o1.addInput(hiddenLayer2)
     edgeh2o1.addOutput(outputLayer)
-    
+
     //Linking edges to nodes.
     inputLayer1.addOutputs(Seq(edgei1h1, edgei1h2))
     inputLayer2.addOutputs(Seq(edgei2h1, edgei2h2))

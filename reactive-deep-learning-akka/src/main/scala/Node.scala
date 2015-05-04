@@ -1,31 +1,32 @@
-import Node.{Ack, AddOutputs, AddInputs}
-import akka.actor._
+import Node.{Input, Ack, AddOutputs, AddInputs}
+import akka.typed.ActorRef
+import akka.typed.ScalaDSL.Static
 
 object Node {
   case class Input(feature: Double)
   case class WeightedInput(feature: Double, weight: Double)
 
-  case class AddInputs(input: Seq[ActorRef])
-  case class AddOutputs(output: Seq[ActorRef])
   case object Ack
+  case class AddInputs(inputs: Seq[ActorRef[Nothing]], replyTo: ActorRef[Ack])
+  case class AddOutputs(outputs: Seq[ActorRef[Input]], replyTo: ActorRef[Ack])
 }
 
-trait Node extends Actor
+trait Node //extends Actor
 
 trait HasInputs extends Node {
-  var inputs: Seq[ActorRef] = Seq()
-  def addInput: Receive = {
-    case AddInputs(i) =>
-      inputs = i
-      sender() ! Ack
+  var inputs: Seq[ActorRef[Nothing]] = Seq()
+
+  val addInput = Static[AddInputs] { msg =>
+      inputs = msg.inputs
+      msg.replyTo ! Ack
   }
 }
 
 trait HasOutputs extends Node {
-  var outputs: Seq[ActorRef] = Seq()
-  def addOutput: Receive = {
-    case AddOutputs(o) =>
-      outputs = o
-      sender() ! Ack
+  var outputs: Seq[ActorRef[Input]] = Seq()
+
+  val addOutput = Static[AddOutputs] { msg =>
+      outputs = msg.outputs
+      msg.replyTo ! Ack
   }
 }

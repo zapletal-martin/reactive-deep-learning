@@ -1,11 +1,14 @@
 import Node.{Input, AddInputs, AddOutputs}
 import Edge.{AddInput, AddOutput}
-import akka.actor.{ActorSystem, Props}
 import akka.util.Timeout
 import akka.pattern.ask
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import akka.typed._
+import akka.typed.ScalaDSL._
+import akka.typed.AskPattern._
+
 
 object Main extends App {
 
@@ -21,7 +24,13 @@ object Main extends App {
   // I-----
   //**************************************
   override def main(params: Array[String]) = {
-    val system = ActorSystem("akka")
+
+
+    val greeter: Behavior[String] = Static[String] { msg ⇒
+       println(s"Hello ${msg}!")
+     }
+
+    val system = ActorSystem("akka", Props(greeter))
 
     implicit val t = Timeout(10 seconds)
     val d = t.duration

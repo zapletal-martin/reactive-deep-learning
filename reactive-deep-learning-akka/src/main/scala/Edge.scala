@@ -1,38 +1,39 @@
 import Node.{WeightedInput, Input, Ack}
 import Edge.{AddOutput, AddInput}
-import akka.actor.{Props, ActorRef, Actor}
+import akka.typed.{Props, ActorRef}
+import akka.typed.ScalaDSL.{Or, Static}
 
 object Edge {
-  case class AddInput(input: ActorRef)
-  case class AddOutput(output: ActorRef)
+  case class AddInput(input: ActorRef[Nothing], replyTo: ActorRef[Ack])
+  case class AddOutput(output: ActorRef[WeightedInput], replyTo: ActorRef[Ack])
 
   def props(): Props = Props[Edge]
 }
 
-trait HasInput extends Actor {
-  var input: ActorRef = _
-  def addInput(): Receive = {
-    case AddInput(i) =>
-      input = i
-      sender() ! Ack
+trait HasInput {
+  var input: ActorRef[Nothing] = _
+
+  val addInput = Static[AddInput] { msg =>
+      input = msg.input
+      msg.replyTo ! Ack
   }
 }
 
-trait HasOutput extends Actor {
-  var output: ActorRef = _
-  def addOutput(): Receive = {
-    case AddOutput(o) =>
-      output = o
-      sender() ! Ack
+trait HasOutput {
+  var output: ActorRef[WeightedInput] = _
+
+  val addOutput = Static[AddOutput] { msg =>
+    output = msg.output
+    msg.replyTo ! Ack
   }
 }
 
 class Edge extends HasInput with HasOutput {
   var weight: Double = 0.3
 
-  override def receive: Receive = run orElse addInput orElse addOutput
+  def receive = Or(Or(run, addOutput), addInput)
 
-  def run: Receive = {
+  def run = Static {
     case Input(f) => output ! WeightedInput(f, weight)
   }
 }
