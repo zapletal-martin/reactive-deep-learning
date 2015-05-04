@@ -1,14 +1,16 @@
-import Node.{Input, Ack, AddOutputs, AddInputs}
+import Node._
+import Edge.EdgeMessage
 import akka.typed.ActorRef
 import akka.typed.ScalaDSL.Static
 
 object Node {
-  case class Input(feature: Double)
-  case class WeightedInput(feature: Double, weight: Double)
+  trait NodeMessage
+  case class Input(feature: Double) extends NodeMessage with EdgeMessage
+  case class WeightedInput(feature: Double, weight: Double) extends NodeMessage
 
   case object Ack
-  case class AddInputs(inputs: Seq[ActorRef[Nothing]], replyTo: ActorRef[Ack])
-  case class AddOutputs(outputs: Seq[ActorRef[Input]], replyTo: ActorRef[Ack])
+  case class AddInputs(inputs: Seq[ActorRef[Nothing]], replyTo: ActorRef[Ack.type]) extends NodeMessage
+  case class AddOutputs(outputs: Seq[ActorRef[Input]], replyTo: ActorRef[Ack.type]) extends NodeMessage
 }
 
 trait Node //extends Actor
@@ -16,17 +18,19 @@ trait Node //extends Actor
 trait HasInputs extends Node {
   var inputs: Seq[ActorRef[Nothing]] = Seq()
 
-  val addInput = Static[AddInputs] { msg =>
-      inputs = msg.inputs
-      msg.replyTo ! Ack
+  val addInput = Static[NodeMessage] {
+    case AddInputs(i, r) =>
+      inputs = i
+      r ! Ack
   }
 }
 
 trait HasOutputs extends Node {
   var outputs: Seq[ActorRef[Input]] = Seq()
 
-  val addOutput = Static[AddOutputs] { msg =>
-      outputs = msg.outputs
-      msg.replyTo ! Ack
+  val addOutput = Static[NodeMessage] {
+    case AddOutputs(o, r) =>
+      outputs = o
+      r ! Ack
   }
 }

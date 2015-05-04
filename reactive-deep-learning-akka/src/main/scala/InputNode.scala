@@ -1,14 +1,14 @@
-import Node.Input
-import akka.actor.Props
+import Node.{NodeMessage, Input}
+import akka.typed.Props
+import akka.typed.ScalaDSL.{Or, Static}
 
-object InputNode {
-  def props(): Props = Props[InputNode]
-}
+object InputNode extends HasOutputs {
+  def props() = Props(receive)
 
-class InputNode() extends HasOutputs {
-  override def receive = run orElse addOutput
+  def receive = Or(run, addOutput)
 
-  def run: Receive = {
-    case a: Input => outputs.foreach(_ ! a)
+  def run = Static[NodeMessage] {
+    case i: Input =>
+    outputs.foreach(_ ! i)
   }
 }

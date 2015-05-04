@@ -1,24 +1,22 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import Node.WeightedInput
-import akka.actor.Props
+import Node.{NodeMessage, WeightedInput}
+import akka.typed.Props
+import akka.typed.ScalaDSL.{Or, Static}
 
-object OutputNode {
-  def props(): Props = Props[OutputNode]
-}
+object OutputNode extends HasInputs {
+  def props() = Props(receive)
 
-class OutputNode() extends HasInputs {
   var i = 0
   val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 
-  override def receive = run orElse addInput
+  def receive = Or(run, addInput)
 
-  def run: Receive = {
-    case WeightedInput(a, w) => {
+  def run = Static[NodeMessage] {
+    case WeightedInput(f, _) =>
       val time = new Date(System.currentTimeMillis())
-      println(s"Output $i with result ${a} in ${format.format(time)}")
+      println(s"Output $i with result $f in ${format.format(time)}")
       i = i + 1
-    }
   }
 }
