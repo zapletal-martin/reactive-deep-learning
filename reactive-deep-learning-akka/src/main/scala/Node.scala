@@ -1,7 +1,7 @@
 import Node._
 import Edge.EdgeMessage
-import akka.typed.ActorRef
-import akka.typed.ScalaDSL.Static
+import akka.typed.{Behavior, ActorRef}
+import akka.typed.ScalaDSL._
 
 object Node {
   trait NodeMessage
@@ -13,24 +13,18 @@ object Node {
   case class AddOutputs(outputs: Seq[ActorRef[Input]], replyTo: ActorRef[Ack.type]) extends NodeMessage
 }
 
-trait Node //extends Actor
-
-trait HasInputs extends Node {
-  var inputs: Seq[ActorRef[Nothing]] = Seq()
-
-  val addInput = Static[NodeMessage] {
+object HasInputs {
+  def addInput[T](behavior: Seq[ActorRef[Nothing]] =>  Behavior[T]) = Partial[T] {
     case AddInputs(i, r) =>
-      inputs = i
       r ! Ack
+      behavior(i)
   }
 }
 
-trait HasOutputs extends Node {
-  var outputs: Seq[ActorRef[Input]] = Seq()
-
-  val addOutput = Static[NodeMessage] {
+object HasOutputs {
+  def addOutput[T](behavior: (Seq[ActorRef[Nothing]], Seq[ActorRef[Input]]) =>  Behavior[T], inputs: Seq[ActorRef[Nothing]]) = Partial[T] {
     case AddOutputs(o, r) =>
-      outputs = o
       r ! Ack
+      behavior(inputs, o)
   }
 }

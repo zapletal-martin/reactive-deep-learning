@@ -2,21 +2,22 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import Node.{NodeMessage, WeightedInput}
-import akka.typed.Props
-import akka.typed.ScalaDSL.{Or, Static}
+import akka.typed.{Behavior, ActorRef, Props}
+import akka.typed.ScalaDSL._
 
-object OutputNode extends HasInputs {
+object OutputNode  {
+  import HasInputs._
+
   def props() = Props(receive)
 
-  var i = 0
   val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 
-  def receive = Or(run, addInput)
+  def receive = addInput(run(_, 0))
 
-  def run = Static[NodeMessage] {
+  def run(inputs: Seq[ActorRef[Nothing]], i: Int): Behavior[NodeMessage] = Partial[NodeMessage] {
     case WeightedInput(f, _) =>
       val time = new Date(System.currentTimeMillis())
       println(s"Output $i with result $f in ${format.format(time)}")
-      i = i + 1
+      run(inputs, i + 1)
   }
 }

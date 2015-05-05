@@ -1,33 +1,38 @@
 import Node._
-import akka.typed.{Props, ActorRef}
-import akka.typed.ScalaDSL.{Or, Static}
+import akka.typed.{Behavior, Props, ActorRef}
+import akka.typed.ScalaDSL._
 
-object Perceptron extends Neuron {
+object Perceptron {
+  import HasInputs._
+  import HasOutputs._
+  import Neuron._
+
   def props() = Props(receive)
 
-  override var activationFunction: Double => Double = Neuron.sigmoid
-  override var bias: Double = 0.1
-
-  var weightsT: Seq[Double] = Seq()
-  var featuresT: Seq[Double] = Seq()
-
-  def receive = Or(Or(run, addInput), addOutput)
+  def receive = addInput(addOutput(run(_, _, 0.1, sigmoid, Seq(), Seq()), _)) // run && addInput && addOutput
 
   private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[ActorRef[Nothing]]) =
     w.length == in.length && f.length == in.length
 
-  def run = Static[NodeMessage] {
-    case WeightedInput(f, w) =>
-      featuresT = featuresT :+ f
-      weightsT = weightsT :+ w
+  def run(
+      inputs: Seq[ActorRef[Nothing]],
+      outputs: Seq[ActorRef[Input]],
+      bias: Double,
+      activationFunction: Double => Double,
+      weightsT: Seq[Double],
+      featuresT: Seq[Double]): Behavior[NodeMessage] = Partial[NodeMessage] {
 
-      if(allInputsAvailable(weightsT, featuresT, inputs)) {
+    case WeightedInput(f, w) =>
+      val featuresTplusOne = featuresT :+ f
+      val weightsTplusOne = weightsT :+ w
+
+      if(allInputsAvailable(featuresTplusOne, weightsTplusOne, inputs)) {
         val activation = activationFunction(weightsT.zip(featuresT).map(x => x._1 * x._2).sum + bias)
 
-        featuresT = Seq()
-        weightsT = Seq()
-
         outputs.foreach(_ ! Input(activation))
+        run(inputs, outputs, bias, activationFunction, Seq(), Seq())
+      } else {
+        run(inputs, outputs, bias, activationFunction, featuresTplusOne, weightsTplusOne)
       }
   }
 }

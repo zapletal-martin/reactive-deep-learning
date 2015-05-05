@@ -1,41 +1,41 @@
 import Node.{WeightedInput, Input, Ack}
-import Edge.{EdgeMessage, AddOutput, AddInput}
-import akka.typed.{Behavior, Props, ActorRef}
-import akka.typed.ScalaDSL.{Or, Static}
+import Edge.AddInput
+import akka.typed.{ActorRef, Behavior, Props}
+import akka.typed.ScalaDSL._
 
-trait HasInput {
-  var input: ActorRef[Nothing] = _
-
-  val addInput: Behavior[EdgeMessage] = Static[EdgeMessage] {
+object HasInput {
+  def addInput[T](behavior: ActorRef[Nothing] => Behavior[T]) = Partial[T] {
     case AddInput(i, r) =>
-      input = i
       r ! Ack
+      behavior(i)
   }
 }
 
-trait HasOutput {
-  var output: ActorRef[WeightedInput] = _
+object HasOutput {
+  import Edge._
 
-  val addOutput: Behavior[EdgeMessage] = Static[EdgeMessage] {
+  def addOutput[T](behavior: (ActorRef[Nothing], ActorRef[WeightedInput]) => Behavior[T], input: ActorRef[Nothing]) = Partial[T] {
     case AddOutput(o, r) =>
-      output = o
       r ! Ack
+      behavior(input, o)
   }
 }
 
-object Edge extends HasInput with HasOutput {
+object Edge {
+  import HasInput._
+  import HasOutput._
+
   trait EdgeMessage
   case class AddInput(input: ActorRef[Nothing], replyTo: ActorRef[Ack.type]) extends EdgeMessage
   case class AddOutput(output: ActorRef[WeightedInput], replyTo: ActorRef[Ack.type]) extends EdgeMessage
 
   def props() = Props(receive)
 
-  var weight: Double = 0.3
+  def receive = addInput(addOutput(run(_, _, 0.3), _))
 
-  def receive = Or(Or(run, addOutput), addInput)
-
-  def run: Behavior[EdgeMessage] = Static[EdgeMessage] {
+  def run(input: ActorRef[Nothing], output: ActorRef[WeightedInput], weight: Double): Behavior[EdgeMessage] = Partial[EdgeMessage] {
     case Input(f) =>
-    output ! WeightedInput(f, weight)
+      output ! WeightedInput(f, weight)
+      run(input, output, weight)
   }
 }
