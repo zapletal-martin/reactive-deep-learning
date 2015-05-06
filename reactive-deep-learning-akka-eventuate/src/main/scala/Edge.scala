@@ -1,21 +1,25 @@
-import Node.Input
-import Node.WeightedInput
+import Node.InputCommand
+import Node.WeightedInputCommand
 import Node._
-import Edge.{AddInput, AddOutput}
+import Edge.{AddInputCommand, AddOutputCommand}
 import akka.actor.{ActorRef, Actor, Props}
+import com.rbmhtechnology.eventuate.EventsourcedActor
+
+import scala.util.{Success, Failure}
 
 object Edge {
-  case class AddInput(input: ActorRef)
-  case class AddOutput(output: ActorRef)
+  case class AddInputCommand(input: ActorRef)
+  case class AddOutputCommand(output: ActorRef)
 
-  def props(): Props = Props[Edge]
+  def props(aggregateId: Option[String], replicaId: String, eventLog: ActorRef): Props =
+    Props(new Edge(aggregateId, replicaId, eventLog))
 }
 
 trait HasInput extends Actor {
   var input: ActorRef = _
 
   def addInput(): Receive = {
-    case AddInput(i) =>
+    case AddInputCommand(i) =>
       input = i
       sender() ! Ack
   }
@@ -25,18 +29,34 @@ trait HasOutput extends Actor {
   var output: ActorRef = _
 
   def addOutput(): Receive = {
-    case AddOutput(o) =>
+    case AddOutputCommand(o) =>
       output = o
       sender() ! Ack
   }
 }
 
-class Edge extends HasInput with HasOutput {
+class Edge(
+    override val aggregateId: Option[String],
+    override val replicaId: String,
+    override val eventLog: ActorRef) extends EventsourcedActor with HasInput with HasOutput {
+
   var weight: Double = 0.3
 
-  override def receive: Receive = run orElse addInput orElse addOutput
+  override def onCommand: Receive = run orElse addInput orElse addOutput
+
+  override def onEvent: Receive = {
+    case UpdatedWeightEvent(w) => weight = w
+  }
 
   def run: Receive = {
-    case Input(f) => output ! WeightedInput(f, weight)
+    case InputCommand(f) => output ! WeightedInputCommand(f, weight)
+    case UpdateWeightCommand(w) =>
+      persist(UpdatedWeightEvent(w)) {
+        case Success(evt) =>
+          println(s"Successfuly persisted weight update $evt")
+          onEvent(evt)
+        case Failure(e) =>
+          println(s"Failed to persist weight update ${e.getMessage}")
+      }
   }
 }

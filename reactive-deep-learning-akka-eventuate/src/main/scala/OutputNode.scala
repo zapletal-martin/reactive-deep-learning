@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import Node.WeightedInput
+import Node.WeightedInputCommand
 import akka.actor.Props
 
 object OutputNode {
@@ -15,7 +15,7 @@ class OutputNode() extends HasInputs {
   override def receive = run orElse addInput
 
   def run: Receive = {
-    case WeightedInput(f, w) => {
+    case WeightedInputCommand(f, w) => {
       val time = new Date(System.currentTimeMillis())
       println(s"Output $i with result ${f} in ${format.format(time)}")
       i = i + 1

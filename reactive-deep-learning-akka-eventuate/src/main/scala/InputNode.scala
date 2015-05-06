@@ -1,15 +1,14 @@
-import Node.Input
-import akka.actor.Props
+import Node.InputCommand
+import akka.actor.{ActorRef, Props}
 
 object InputNode {
   def props(): Props = Props[InputNode]
-  val shardName: String = "InputNode"
 }
 
 class InputNode() extends HasOutputs {
   override def receive = run orElse addOutput
 
   def run: Receive = {
-    case i: Input => outputs.foreach(_ ! i)
+    case i: InputCommand => outputs.foreach(_ ! i)
   }
 }

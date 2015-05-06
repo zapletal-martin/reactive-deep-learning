@@ -18,3 +18,5 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-remote" % akkaVersion,
   "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 )
+
+fork in run := true
