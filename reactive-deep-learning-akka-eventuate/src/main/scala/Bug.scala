@@ -7,8 +7,6 @@ object Bug {
 
   val file = scala.io.Source.fromFile("src/main/resources/data.csv").getLines()
 
-
-
   println(s"file size ${file.size.toDouble}")
   println(s"model size ${parallelModels.size.toDouble}")
 

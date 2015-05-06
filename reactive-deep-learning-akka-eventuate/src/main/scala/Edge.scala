@@ -49,7 +49,8 @@ class Edge(
   }
 
   def run: Receive = {
-    case InputCommand(f) => output ! WeightedInputCommand(f, weight)
+    case InputCommand(f) =>
+      output ! WeightedInputCommand(f, weight)
     case UpdateWeightCommand(w) =>
       persist(UpdatedWeightEvent(w)) {
         case Success(evt) =>

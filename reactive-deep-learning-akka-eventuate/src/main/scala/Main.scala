@@ -1,4 +1,4 @@
-import Node.{InputCommand, AddInputsCommand, AddOutputsCommand}
+import Node.{UpdateWeightCommand, InputCommand, AddInputsCommand, AddOutputsCommand}
 import Edge.{AddInputCommand, AddOutputCommand}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.util.Timeout
@@ -50,6 +50,8 @@ object Main extends App {
           }
       }
     }
+
+    parallelModels(1)._4 ! UpdateWeightCommand(100)
   }
 
   private def network(system: ActorSystem, eventLog: ActorRef, replica: Int) = {
@@ -117,6 +119,6 @@ object Main extends App {
 
     Await.result(outputLayer ? AddInputsCommand(Seq(edgeh1o1, edgeh2o1)), d)
 
-    (inputLayer1, inputLayer2, inputLayer3)
+    (inputLayer1, inputLayer2, inputLayer3, edgei1h1)
   }
 }
