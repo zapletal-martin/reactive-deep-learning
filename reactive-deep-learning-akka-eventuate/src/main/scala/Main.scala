@@ -3,10 +3,10 @@ import Edge.{AddInputCommand, AddOutputCommand}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.util.Timeout
 import akka.pattern.ask
-import com.rbmhtechnology.eventuate.ReplicationConnection
 import com.rbmhtechnology.eventuate.log.leveldb.LeveldbEventLog
+import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.Await
+import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
 
 object Main extends App {
@@ -26,16 +26,29 @@ object Main extends App {
     val system = ActorSystem("akka")
     val eventLog = system.actorOf(LeveldbEventLog.props(id = "L1", prefix = "log"))
 
-    val inputLayer = network(system, eventLog, 0)
+    val parallelModels = Array(
+      network(system, eventLog, 0),
+      network(system, eventLog, 1),
+      network(system, eventLog, 2)
+    )
 
-    scala.io.Source.fromFile("src/main/resources/data.csv")
-      .getLines()
-      .foreach{ l =>
-      val splits = l.split(",")
+    val file = scala.io.Source.fromFile("src/main/resources/data.csv").getLines().toSeq
 
-      inputLayer._1 ! InputCommand(splits(0).toDouble)
-      inputLayer._2 ! InputCommand(splits(1).toDouble)
-      inputLayer._3 ! InputCommand(splits(2).toDouble)
+    val parallelData = file
+      .grouped((file.size.toDouble / parallelModels.size.toDouble).toInt)
+      .toSeq
+
+    for(i <- 0 to parallelModels.size - 1) {
+      Future {
+        parallelData(i)
+          .foreach{ l =>
+            val splits = l.split(",")
+
+            parallelModels(i)._1 ! InputCommand(splits(0).toDouble)
+            parallelModels(i)._2 ! InputCommand(splits(1).toDouble)
+            parallelModels(i)._3 ! InputCommand(splits(2).toDouble)
+          }
+      }
     }
   }
 
