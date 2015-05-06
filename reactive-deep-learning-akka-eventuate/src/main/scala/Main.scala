@@ -44,6 +44,7 @@ object Main extends App {
           .foreach{ l =>
             val splits = l.split(",")
 
+            Thread.sleep(1000)
             parallelModels(i)._1 ! InputCommand(splits(0).toDouble)
             parallelModels(i)._2 ! InputCommand(splits(1).toDouble)
             parallelModels(i)._3 ! InputCommand(splits(2).toDouble)
@@ -51,7 +52,13 @@ object Main extends App {
       }
     }
 
-    parallelModels(1)._4 ! UpdateWeightCommand(100)
+    (0 to 100)
+      .par
+      .foreach{ j =>
+        parallelModels(0)._4 ! UpdateWeightCommand(0.1)
+        parallelModels(1)._4 ! UpdateWeightCommand(0.5)
+        parallelModels(2)._4 ! UpdateWeightCommand(0.9)
+    }
   }
 
   private def network(system: ActorSystem, eventLog: ActorRef, replica: Int) = {

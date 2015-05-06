@@ -41,21 +41,25 @@ class Edge(
     override val eventLog: ActorRef) extends EventsourcedActor with HasInput with HasOutput {
 
   var weight: Double = 0.3
+  var count: Int = 1
 
   override def onCommand: Receive = run orElse addInput orElse addOutput
 
   override def onEvent: Receive = {
-    case UpdatedWeightEvent(w) => weight = w
+    case UpdatedWeightEvent(w) =>
+      weight = (weight * count + w) / (count + 1)
+      count = count + 1
   }
 
   def run: Receive = {
     case InputCommand(f) =>
       output ! WeightedInputCommand(f, weight)
+      println(s"AggregateId $aggregateId replicaId $replicaId has weight $weight")
     case UpdateWeightCommand(w) =>
       persist(UpdatedWeightEvent(w)) {
         case Success(evt) =>
-          println(s"Successfuly persisted weight update $evt")
           onEvent(evt)
+          println(s"Successfuly persisted weight update $evt")
         case Failure(e) =>
           println(s"Failed to persist weight update ${e.getMessage}")
       }
