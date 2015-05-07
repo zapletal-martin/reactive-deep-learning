@@ -49,19 +49,18 @@ class Edge(
 
   override def onEvent: Receive = {
     case UpdatedWeightEvent(w) =>
-      //weight = weight :+ w
       versionedState = versionedState.update(w, lastVectorTimestamp, lastEmitterReplicaId)
       if (versionedState.conflict) {
-        println(s"CONFLICTING VERSIONS 1 FOR $replicaId " + versionedState.all)
+        //println(s"CONFLICTING VERSIONS 1 FOR $replicaId " + versionedState.all)
         val conflictingVersions = versionedState.all
         val avg = conflictingVersions.map(_.value).sum / conflictingVersions.size
 
-        val newTimestamp = conflictingVersions.map(_.updateTimestamp).foldLeft(VectorTime())(_.merge(_)) //lastVectorTimestamp.increase(processId)
+        val newTimestamp = conflictingVersions.map(_.updateTimestamp).foldLeft(VectorTime())(_.merge(_))
         versionedState.update(avg, newTimestamp, replicaId)
         versionedState = versionedState.resolve(newTimestamp)
 
         weight = versionedState.all.head.value
-        println(s"CONFLICTING VERSIONS 2 FOR $replicaId " + versionedState.all)
+        //println(s"CONFLICTING VERSIONS 2 FOR $replicaId " + versionedState.all)
       } else {
         weight = versionedState.all.head.value
       }
@@ -70,7 +69,7 @@ class Edge(
   def run: Receive = {
     case InputCommand(f) =>
       output ! WeightedInputCommand(f, weight)
-      println(s"AggregateId $aggregateId replicaId $replicaId has weight $weight")
+      //println(s"AggregateId $aggregateId replicaId $replicaId has weight $weight")
     case UpdateWeightCommand(w) =>
       persist(UpdatedWeightEvent(w)) {
         case Success(evt) => onEvent(evt)

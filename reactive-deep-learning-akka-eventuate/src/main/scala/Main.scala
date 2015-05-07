@@ -55,9 +55,9 @@ object Main extends App {
     (0 to 2)
       .par
       .foreach{ j =>
-        parallelModels(0)._4 ! UpdateWeightCommand(0 + j)
-        parallelModels(1)._4 ! UpdateWeightCommand(100 + j)
-        parallelModels(2)._4 ! UpdateWeightCommand(200 + j)
+        parallelModels(0)._4 ! UpdateWeightCommand(0.1 * j)
+        parallelModels(1)._4 ! UpdateWeightCommand(0.2 * j)
+        parallelModels(2)._4 ! UpdateWeightCommand(0.3 * j)
     }
   }
 
