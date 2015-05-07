@@ -1,4 +1,4 @@
-object Bug {
+object Bug extends App {
   val parallelModels = Array(
     3,
     3,
@@ -12,7 +12,7 @@ object Bug {
 
   val fileSize: Double = file.size.toDouble
   val modelSize: Double = parallelModels.size.toDouble
-  val divided: Double = fileSize./(modelSize)
+  val divided: Double = fileSize / modelSize
 
   println(s"divided $divided")
 }
