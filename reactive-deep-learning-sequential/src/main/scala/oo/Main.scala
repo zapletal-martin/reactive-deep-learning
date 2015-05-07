@@ -13,7 +13,10 @@ object Main extends App {
     val hiddenLayer2 = new Perceptron()
 
     //Output layer nodes.
-    val outputLayer = new OutputNode()
+    val outputLayer = new Perceptron()
+
+    //Printer
+    val printer = new OutputNode()
 
     val edgei1h1 = new Edge()
     val edgei1h2 = new Edge()
@@ -23,6 +26,7 @@ object Main extends App {
     val edgei3h2 = new Edge()
     val edgeh1o1 = new Edge()
     val edgeh2o1 = new Edge()
+    val edgeo1p1 = new Edge()
 
     //Input layer to hidden layer edges.
     edgei1h1.addInput(inputLayer1)
@@ -50,6 +54,10 @@ object Main extends App {
     edgeh2o1.addInput(hiddenLayer2)
     edgeh2o1.addOutput(outputLayer)
 
+    //Output layer to printer
+    edgeo1p1.addInput(outputLayer)
+    edgeo1p1.addOutput(printer)
+
     //Linking edges to nodes.
     inputLayer1.addOutputs(Seq(edgei1h1, edgei1h2))
     inputLayer2.addOutputs(Seq(edgei2h1, edgei2h2))
@@ -62,6 +70,9 @@ object Main extends App {
     hiddenLayer2.addOutputs(Seq(edgeh2o1))
 
     outputLayer.addInputs(Seq(edgeh1o1, edgeh2o1))
+    outputLayer.addOutputs(Seq(edgeo1p1))
+
+    printer.addInputs(Seq(edgeo1p1))
 
     scala.io.Source.fromFile("src/main/resources/data.csv")
       .getLines()

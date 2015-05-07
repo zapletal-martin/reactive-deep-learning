@@ -1,10 +1,15 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import breeze.linalg.{*, DenseMatrix}
 import akka.stream.scaladsl._
 import breeze.numerics.sigmoid
 
 object PerNetwork {
   def graph(input: Source[Seq[Double], Unit]) = {
-    val weightsVector = Array.fill(8)(.3)
+    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+
+    val weightsVector = Array.fill(8)(0.3)
     val bias = 0.2
 
     val topology = Array(3, 2, 1)
@@ -57,7 +62,8 @@ object PerNetwork {
 
       val index = Source(() => Iterator.from(0, 1))
 
-      val out = Sink.foreach(println)
+      val out = Sink
+        .foreach((x: (DenseMatrix[Double], Int)) => println(s"Output ${x._2} with result ${x._1}in ${format.format(new Date(System.currentTimeMillis()))}"))
 
       input         ~> inputsFlow  ~> zipInputAndWeights.in0
       weightsSource ~> weightsFlow ~> zipInputAndWeights.in1
