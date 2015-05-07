@@ -52,12 +52,12 @@ object Main extends App {
       }
     }
 
-    (0 to 100)
+    (0 to 2)
       .par
       .foreach{ j =>
-        parallelModels(0)._4 ! UpdateWeightCommand(0.1)
-        parallelModels(1)._4 ! UpdateWeightCommand(0.5)
-        parallelModels(2)._4 ! UpdateWeightCommand(0.9)
+        parallelModels(0)._4 ! UpdateWeightCommand(0 + j)
+        parallelModels(1)._4 ! UpdateWeightCommand(100 + j)
+        parallelModels(2)._4 ! UpdateWeightCommand(200 + j)
     }
   }
 

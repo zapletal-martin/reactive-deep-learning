@@ -3,7 +3,7 @@ import Node.WeightedInputCommand
 import Node._
 import Edge.{AddInputCommand, AddOutputCommand}
 import akka.actor.{ActorRef, Actor, Props}
-import com.rbmhtechnology.eventuate.EventsourcedActor
+import com.rbmhtechnology.eventuate.{VectorTime, ConcurrentVersions, EventsourcedActor}
 
 import scala.util.{Success, Failure}
 
@@ -41,14 +41,30 @@ class Edge(
     override val eventLog: ActorRef) extends EventsourcedActor with HasInput with HasOutput {
 
   var weight: Double = 0.3
-  var count: Int = 1
 
   override def onCommand: Receive = run orElse addInput orElse addOutput
 
+  private var versionedState: ConcurrentVersions[Double, Double] =
+    ConcurrentVersions(0.3, (s, a) => a)
+
   override def onEvent: Receive = {
     case UpdatedWeightEvent(w) =>
-      weight = (weight * count + w) / (count + 1)
-      count = count + 1
+      //weight = weight :+ w
+      versionedState = versionedState.update(w, lastVectorTimestamp, lastEmitterReplicaId)
+      if (versionedState.conflict) {
+        println(s"CONFLICTING VERSIONS 1 FOR $replicaId " + versionedState.all)
+        val conflictingVersions = versionedState.all
+        val avg = conflictingVersions.map(_.value).sum / conflictingVersions.size
+
+        val newTimestamp = conflictingVersions.map(_.updateTimestamp).foldLeft(VectorTime())(_.merge(_)) //lastVectorTimestamp.increase(processId)
+        versionedState.update(avg, newTimestamp, replicaId)
+        versionedState = versionedState.resolve(newTimestamp)
+
+        weight = versionedState.all.head.value
+        println(s"CONFLICTING VERSIONS 2 FOR $replicaId " + versionedState.all)
+      } else {
+        weight = versionedState.all.head.value
+      }
   }
 
   def run: Receive = {
@@ -57,11 +73,8 @@ class Edge(
       println(s"AggregateId $aggregateId replicaId $replicaId has weight $weight")
     case UpdateWeightCommand(w) =>
       persist(UpdatedWeightEvent(w)) {
-        case Success(evt) =>
-          onEvent(evt)
-          println(s"Successfuly persisted weight update $evt")
+        case Success(evt) => onEvent(evt)
         case Failure(e) =>
-          println(s"Failed to persist weight update ${e.getMessage}")
       }
   }
 }
