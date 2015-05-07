@@ -9,7 +9,7 @@ object Perceptron {
 
   def props() = Props(receive)
 
-  def receive = addInput(addOutput(run(_, _, 0.1, sigmoid, Seq(), Seq()), _)) // run && addInput && addOutput
+  def receive = addInput(addOutput(run(_, _, 0.2, sigmoid, Seq(), Seq()), _)) // run && addInput && addOutput
 
   private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[ActorRef[Nothing]]) =
     w.length == in.length && f.length == in.length
@@ -27,12 +27,12 @@ object Perceptron {
       val weightsTplusOne = weightsT :+ w
 
       if(allInputsAvailable(featuresTplusOne, weightsTplusOne, inputs)) {
-        val activation = activationFunction(weightsT.zip(featuresT).map(x => x._1 * x._2).sum + bias)
+        val activation = activationFunction(weightsTplusOne.zip(featuresTplusOne).map(x => x._1 * x._2).sum + bias)
 
         outputs.foreach(_ ! Input(activation))
         run(inputs, outputs, bias, activationFunction, Seq(), Seq())
       } else {
-        run(inputs, outputs, bias, activationFunction, featuresTplusOne, weightsTplusOne)
+        run(inputs, outputs, bias, activationFunction, weightsTplusOne, featuresTplusOne)
       }
   }
 }
