@@ -1,6 +1,7 @@
 import akka.actor.ActorSystem
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl._
+import breeze.linalg.DenseMatrix
 
 object Main extends App {
   override def main (args: Array[String]) {
@@ -15,7 +16,7 @@ object Main extends App {
         val splits = l.split(",")
         val features = splits.map(_.toDouble)
 
-        Seq(features(0), features(1), features(2))
+        new DenseMatrix(3, 1, Array(features(0), features(1), features(2)))
       }
 
     //PerNode.graph(input).run()

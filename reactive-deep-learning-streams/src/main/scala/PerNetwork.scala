@@ -6,7 +6,7 @@ import akka.stream.scaladsl._
 import breeze.numerics.sigmoid
 
 object PerNetwork {
-  def graph(input: Source[Seq[Double], Unit]) = {
+  def graph(input: Source[Array[Double], Unit]) = {
     val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 
     val weightsVector = Array.fill(8)(0.3)
@@ -28,7 +28,7 @@ object PerNetwork {
       weightMatrices
     }
 
-    def toMatrix(i: Seq[Double]) =
+    def toMatrix(i: Array[Double]) =
       new DenseMatrix(topology(0), 1, i.toArray)
 
     def feedForward(data: DenseMatrix[Double], weightMatrices: Array[DenseMatrix[Double]]) = {
@@ -43,11 +43,11 @@ object PerNetwork {
       outArray.last
     }
 
-    val g = FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>
+    FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>
       import FlowGraph.Implicits._
 
       val weightsFlow = Flow[Array[Double]].map(weights)
-      val inputsFlow = Flow[Seq[Double]].map(toMatrix)
+      val inputsFlow = Flow[Array[Double]].map(toMatrix)
       val feedForwardFlow = Flow[(DenseMatrix[Double], Array[DenseMatrix[Double]])].map(x => feedForward(x._1, x._2))
       val zipInputAndWeights = builder.add(Zip[DenseMatrix[Double], Array[DenseMatrix[Double]]]())
       val zipWithIndex = builder.add(Zip[DenseMatrix[Double], Int]())
@@ -61,7 +61,5 @@ object PerNetwork {
                                                                           index ~> zipWithIndex.in1
                                                                                    zipWithIndex.out ~> out
     }
-
-    g
   }
 }
