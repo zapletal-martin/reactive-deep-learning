@@ -12,8 +12,9 @@ object PerLayer {
 
     val bias = 0.2
     val topology = Array(3, 2, 1)
+    val weights = new DenseMatrix[Double](3, 6, Array.fill(3 * 6)(0.3))
 
-    def hiddenLayerWeights(layer: Int) = {
+    def hiddenLayerWeights(layer: Int, weights: DenseMatrix[Double]) = {
       def hiddenLayerWeightsMatrix(layer: Int) =
         new DenseMatrix[Double](topology(layer), topology(layer - 1), Array.fill(topology(layer) * topology(layer - 1))(0.3))
 
@@ -40,22 +41,28 @@ object PerLayer {
       }
     }
 
-    def network(topology: Array[Int]) = {
+    //TODO: Use weights. Now passed in just for readability. They are 0.3 every time
+    def network(topology: Array[Int], weights: DenseMatrix[Double]) = {
 
       FlowGraph.partial() { implicit builder: FlowGraph.Builder[Unit] =>
         import FlowGraph.Implicits._
 
-        def buildLayer(layer: Int, input: Outlet[DenseMatrix[Double]], topology: Array[Int]): Outlet[DenseMatrix[Double]] = {
+        def buildLayer(
+            layer: Int,
+            input: Outlet[DenseMatrix[Double]],
+            topology: Array[Int],
+            weights: DenseMatrix[Double]): Outlet[DenseMatrix[Double]] = {
+
           val layer1 = builder.add(hiddenLayer(layer))
 
           input                     ~> layer1.in0
-          hiddenLayerWeights(layer) ~> layer1.in1
+          hiddenLayerWeights(layer, weights) ~> layer1.in1
 
-          if (layer < topology.length - 1) buildLayer(layer + 1, layer1.out, topology) else layer1.out
+          if (layer < topology.length - 1) buildLayer(layer + 1, layer1.out, topology, weights) else layer1.out
         }
 
         val flow = builder.add(Flow[DenseMatrix[Double]])
-        val network = buildLayer(1, flow.outlet, topology)
+        val network = buildLayer(1, flow.outlet, topology, weights)
 
         new FlowShape(flow.inlet, network)
       }
@@ -83,7 +90,7 @@ object PerLayer {
 
     FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>
       import FlowGraph.Implicits._
-      input ~> network(topology) ~> zipWithIndex ~> formatPrintSink
+      input ~> network(topology, weights) ~> zipWithIndex ~> formatPrintSink
     }
   }
 }
