@@ -83,10 +83,7 @@ object PerLayer {
 
     FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>
       import FlowGraph.Implicits._
-
-      val inputOutlet = builder.add(Flow[DenseMatrix[Double]])
-
-      input ~> inputOutlet ~> network(topology) ~> zipWithIndex ~> formatPrintSink
+      input ~> network(topology) ~> zipWithIndex ~> formatPrintSink
     }
   }
 }
