@@ -3,7 +3,7 @@ import akka.stream.scaladsl._
 //TODO: I don't think this is correct. Apply H->O weights
 object PerNode {
   def graph(input: Source[Seq[Double], Unit]) = {
-    val hiddenLayerWeights = Array.fill(6)(.2).toSeq
+    val hiddenLayerWeights = Array.fill(6)(.3).toSeq
     val hiddenLayer = Source(() => Iterator.continually(hiddenLayerWeights))
 
     val g = FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>

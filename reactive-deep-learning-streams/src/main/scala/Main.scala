@@ -18,7 +18,8 @@ object Main extends App {
         Seq(features(0), features(1), features(2))
       }
 
-      //PerNode.graph(input).run()
-      PerNetwork.graph(input).run();
+    //PerNode.graph(input).run()
+    PerLayer.graph(input).run()
+    //PerNetwork.graph(input).run();
   }
 }

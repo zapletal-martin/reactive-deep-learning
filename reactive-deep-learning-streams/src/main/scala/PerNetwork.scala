@@ -28,9 +28,8 @@ object PerNetwork {
       weightMatrices
     }
 
-    def toMatrix(i: Seq[Double]) = {
+    def toMatrix(i: Seq[Double]) =
       new DenseMatrix(topology(0), 1, i.toArray)
-    }
 
     def feedForward(data: DenseMatrix[Double], weightMatrices: Array[DenseMatrix[Double]]) = {
       val outArray = new Array[DenseMatrix[Double]](topology.size)
@@ -47,21 +46,12 @@ object PerNetwork {
     val g = FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>
       import FlowGraph.Implicits._
 
-      val weightsFlow = Flow[Array[Double]]
-        .map(weights)
-
-      val inputsFlow = Flow[Seq[Double]]
-        .map(toMatrix)
-
-      val feedForwardFlow = Flow[(DenseMatrix[Double], Array[DenseMatrix[Double]])]
-        .map(x => feedForward(x._1, x._2))
-
+      val weightsFlow = Flow[Array[Double]].map(weights)
+      val inputsFlow = Flow[Seq[Double]].map(toMatrix)
+      val feedForwardFlow = Flow[(DenseMatrix[Double], Array[DenseMatrix[Double]])].map(x => feedForward(x._1, x._2))
       val zipInputAndWeights = builder.add(Zip[DenseMatrix[Double], Array[DenseMatrix[Double]]]())
-
       val zipWithIndex = builder.add(Zip[DenseMatrix[Double], Int]())
-
       val index = Source(() => Iterator.from(0, 1))
-
       val out = Sink
         .foreach((x: (DenseMatrix[Double], Int)) => println(s"Output ${x._2} with result ${x._1}in ${format.format(new Date(System.currentTimeMillis()))}"))
 
