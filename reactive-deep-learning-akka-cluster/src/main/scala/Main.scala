@@ -116,11 +116,9 @@ object Main extends App {
   }
 
   def startupSharedJournal(system: ActorSystem, startStore: Boolean, path: ActorPath): Unit = {
-    // Start the shared journal one one node (don't crash this SPOF)
-    // This will not be needed with a distributed journal
     if (startStore)
       system.actorOf(Props[SharedLeveldbStore], "store")
-    // register the shared journal
+
     import system.dispatcher
     implicit val timeout = Timeout(15.seconds)
     val f = (system.actorSelection(path) ? Identify(None))
