@@ -38,7 +38,13 @@ trait HasInput extends PersistentActor {
         input = event.input
         sender() ! Ack
       }
+  }
 
+  def addInputRecover(): Receive = {
+    case AddedInputEvent(_, i) => {
+      //println(s"Recovering AddedInputEvent in $persistenceId")
+      input = i
+    }
   }
 }
 
@@ -51,6 +57,13 @@ trait HasOutput extends PersistentActor {
         sender() ! Ack
       }
   }
+
+  def addOutputRecover(): Receive = {
+    case AddedOutputEvent(_, o) => {
+      //println(s"Recovering AddedOutputEvent in $persistenceId")
+      output = o
+    }
+  }
 }
 
 class Edge extends HasInput with HasOutput {
@@ -60,9 +73,7 @@ class Edge extends HasInput with HasOutput {
 
   override def receiveCommand: Receive = run orElse addInput orElse addOutput
 
-  override def receiveRecover: Receive = {
-    case _ => println(s"Recovering $persistenceId")
-  }
+  override def receiveRecover: Receive = addInputRecover orElse addOutputRecover
 
   val shardRegion = ClusterSharding(context.system).shardRegion(Perceptron.shardName)
   val shardRegionLastLayer = ClusterSharding(context.system).shardRegion(OutputNode.shardName)
@@ -74,7 +85,4 @@ class Edge extends HasInput with HasOutput {
       else
         shardRegion ! WeightedInput(output, f, weight)
   }
-
-
-
 }

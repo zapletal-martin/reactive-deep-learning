@@ -20,9 +20,7 @@ class Perceptron() extends Neuron {
 
   override def receiveCommand: Receive = run orElse addInput orElse addOutput
 
-  override def receiveRecover: Receive = {
-    case _ => println(s"Recovering $persistenceId")
-  }
+  override def receiveRecover: Receive = addInputRecover orElse addOutputRecover
 
   private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[NodeId]) =
     w.length == in.length && f.length == in.length
