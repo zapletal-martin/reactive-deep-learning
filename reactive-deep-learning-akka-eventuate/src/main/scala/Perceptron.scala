@@ -15,7 +15,7 @@ class Perceptron(
     override val eventLog: ActorRef) extends EventsourcedActor with Neuron {
 
   override var activationFunction: Double => Double = Neuron.sigmoid
-  override var bias: Double = 0.1
+  override var bias: Double = 0.2
 
   var weightsT: Seq[Double] = Seq()
   var featuresT: Seq[Double] = Seq()

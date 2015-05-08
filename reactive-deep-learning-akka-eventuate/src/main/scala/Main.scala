@@ -52,13 +52,13 @@ object Main extends App {
       }
     }
 
-    (0 to 2)
+    /*(0 to 2)
       .par
       .foreach{ j =>
         parallelModels(0)._4 ! UpdateWeightCommand(0.1 * j)
         parallelModels(1)._4 ! UpdateWeightCommand(0.2 * j)
         parallelModels(2)._4 ! UpdateWeightCommand(0.3 * j)
-    }
+    }*/
   }
 
   private def network(system: ActorSystem, eventLog: ActorRef, replica: Int) = {
@@ -75,7 +75,10 @@ object Main extends App {
     val hiddenLayer2 = system.actorOf(Perceptron.props(Some("h2"), replica.toString, eventLog))
 
     //Output layer nodes.
-    val outputLayer = system.actorOf(Props[OutputNode])
+    val outputLayer = system.actorOf(Perceptron.props(Some("o1"), replica.toString, eventLog))
+
+    //Printer node.
+    val printer = system.actorOf(Props[OutputNode])
 
     val edgei1h1 = system.actorOf(Edge.props(Some("e1"), replica.toString, eventLog))
     val edgei1h2 = system.actorOf(Edge.props(Some("e2"), replica.toString, eventLog))
@@ -86,6 +89,8 @@ object Main extends App {
 
     val edgeh1o1 = system.actorOf(Edge.props(Some("e7"), replica.toString, eventLog))
     val edgeh2o1 = system.actorOf(Edge.props(Some("e8"), replica.toString, eventLog))
+
+    val edgeo1p1 = system.actorOf(Edge.props(Some("e9"), replica.toString, eventLog))
 
     //Input layer to hidden layer edges.
     Await.result(edgei1h1 ? AddInputCommand(inputLayer1), d)
@@ -113,6 +118,9 @@ object Main extends App {
     Await.result(edgeh2o1 ? AddInputCommand(hiddenLayer2), d)
     Await.result(edgeh2o1 ? AddOutputCommand(outputLayer), d)
 
+    Await.result(edgeo1p1 ? AddInputCommand(outputLayer), d)
+    Await.result(edgeo1p1 ? AddOutputCommand(printer), d)
+
     //Linking edges to nodes.
     Await.result(inputLayer1 ? AddOutputsCommand(Seq(edgei1h1, edgei1h2)), d)
     Await.result(inputLayer2 ? AddOutputsCommand(Seq(edgei2h1, edgei2h2)), d)
@@ -125,6 +133,9 @@ object Main extends App {
     Await.result(hiddenLayer2 ? AddOutputsCommand(Seq(edgeh2o1)), d)
 
     Await.result(outputLayer ? AddInputsCommand(Seq(edgeh1o1, edgeh2o1)), d)
+    Await.result(outputLayer ? AddOutputsCommand(Seq(edgeo1p1)), d)
+
+    Await.result(printer ? AddInputsCommand(Seq(edgeo1p1)), d)
 
     (inputLayer1, inputLayer2, inputLayer3, edgei1h1)
   }
