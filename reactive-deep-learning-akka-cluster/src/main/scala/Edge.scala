@@ -52,7 +52,7 @@ class Edge extends HasInput with HasOutput {
 
   def run: Receive = {
     case Input(r, f) =>
-      if(output.head == 'o')
+      if(output.head == 'p')
         shardRegionLastLayer ! WeightedInput(output, f, weight)
       else
         shardRegion ! WeightedInput(output, f, weight)

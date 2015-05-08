@@ -82,6 +82,10 @@ object Main extends App {
           Await.result(edges ? AddInput("e-2-2-3-1", "n-2-2"), d)
           Await.result(edges ? AddOutput("e-2-2-3-1", "o-3-1"), d)
 
+          //Output layer to printer edge.
+          Await.result(edges ? AddInput("e-3-1-4-1", "o-3-1"), d)
+          Await.result(edges ? AddOutput("e-3-1-4-1", "p-4-1"), d)
+
           //Linking edges to nodes.
           Await.result(inputNodes ? AddOutputs("n-1-1", Seq("e-1-1-2-1", "e-1-1-2-2")), d)
           Await.result(inputNodes ? AddOutputs("n-1-2", Seq("e-1-2-2-1", "e-1-2-2-2")), d)
@@ -93,7 +97,10 @@ object Main extends App {
           Await.result(nodes ? AddInputs("n-2-2", Seq("e-1-1-2-2", "e-1-2-2-2", "e-1-3-2-2")), d)
           Await.result(nodes ? AddOutputs("n-2-2", Seq("e-2-2-3-1")), d)
 
-          Await.result(outputNodes ? AddInputs("o-3-1", Seq("e-2-1-3-1", "e-2-2-3-1")), d)
+          Await.result(nodes ? AddInputs("o-3-1", Seq("e-2-1-3-1", "e-2-2-3-1")), d)
+          Await.result(nodes ? AddOutputs("o-3-1", Seq("e-3-1-4-1")), d)
+
+          Await.result(outputNodes ? AddInputs("p-4-1", Seq("e-3-1-4-1")), d)
 
           scala.io.Source.fromFile("src/main/resources/data.csv")
             .getLines()
