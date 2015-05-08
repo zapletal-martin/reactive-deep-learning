@@ -43,8 +43,7 @@ object Main extends App {
         parallelData(i)
           .foreach{ l =>
             val splits = l.split(",")
-
-            Thread.sleep(1000)
+          
             parallelModels(i)._1 ! InputCommand(splits(0).toDouble)
             parallelModels(i)._2 ! InputCommand(splits(1).toDouble)
             parallelModels(i)._3 ! InputCommand(splits(2).toDouble)
