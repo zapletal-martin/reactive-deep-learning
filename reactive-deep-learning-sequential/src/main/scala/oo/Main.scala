@@ -76,6 +76,8 @@ object Main extends App {
 
     scala.io.Source.fromFile("src/main/resources/data.csv")
       .getLines()
+      .toList
+      .par
       .foreach{ l =>
       val splits = l.split(",")
 
