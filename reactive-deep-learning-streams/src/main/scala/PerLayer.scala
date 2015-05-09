@@ -10,19 +10,13 @@ object PerLayer {
 
   def graph(input: Source[DenseMatrix[Double], Unit]) = {
 
-    val bias = 0.2
-    val topology = Array(3, 2, 1)
-    val weights = new DenseMatrix[Double](3, 6, Array.fill(3 * 6)(0.3))
-
-    def hiddenLayerWeights(layer: Int, weights: DenseMatrix[Double]) = {
-      def hiddenLayerWeightsMatrix(layer: Int) =
-        new DenseMatrix[Double](topology(layer), topology(layer - 1), Array.fill(topology(layer) * topology(layer - 1))(0.3))
-
-      Source(() => Iterator.continually(hiddenLayerWeightsMatrix(layer)))
-    }
+    def hiddenLayerWeights(topology: Array[Int], layer: Int, weights: DenseMatrix[Double]) =
+      Source(() => Iterator.continually(
+        new DenseMatrix[Double](topology(layer), topology(layer - 1), Array.fill(topology(layer) * topology(layer - 1))(0.3))))
 
     def hiddenLayer(layer: Int) = {
       def feedForward(data: DenseMatrix[Double], weightMatrices: DenseMatrix[Double]) = {
+        val bias = 0.2
         val activation: DenseMatrix[Double] = weightMatrices * data
         activation(::, *) :+= bias
         sigmoid.inPlace(activation)
@@ -55,8 +49,8 @@ object PerLayer {
 
           val layer1 = builder.add(hiddenLayer(layer))
 
-          input                     ~> layer1.in0
-          hiddenLayerWeights(layer, weights) ~> layer1.in1
+          input                                        ~> layer1.in0
+          hiddenLayerWeights(topology, layer, weights) ~> layer1.in1
 
           if (layer < topology.length - 1) buildLayer(layer + 1, layer1.out, topology, weights) else layer1.out
         }
@@ -81,12 +75,14 @@ object PerLayer {
         new FlowShape(zipWithIndex.in0, zipWithIndex.out)
       }
 
-    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+    def formatPrintSink() = {
+      val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+      Sink.foreach((x: (DenseMatrix[Double], Int)) =>
+        println(s"Output ${x._2} with result ${x._1}in ${format.format(new Date(System.currentTimeMillis()))}"))
+    }
 
-    val formatPrintSink =
-      Sink
-        .foreach((x: (DenseMatrix[Double], Int)) =>
-        println(s"Output ${x._2} with result ${x._1}in${format.format(new Date(System.currentTimeMillis()))}"))
+    val topology = Array(3, 2, 1)
+    val weights = new DenseMatrix[Double](3, 6, Array.fill(3 * 6)(0.3))
 
     FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>
       import FlowGraph.Implicits._
