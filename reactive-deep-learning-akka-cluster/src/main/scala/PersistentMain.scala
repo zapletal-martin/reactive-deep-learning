@@ -107,12 +107,12 @@ object PersistentMain extends App {
         scala.io.Source.fromFile("src/main/resources/data.csv")
           .getLines()
           .foreach { l =>
-          val splits = l.split(",")
+            val splits = l.split(",")
 
-          inputNodes ! Input("n-1-1", splits(0).toDouble)
-          inputNodes ! Input("n-1-2", splits(1).toDouble)
-          inputNodes ! Input("n-1-3", splits(2).toDouble)
-        }
+            inputNodes ! Input("n-1-1", splits(0).toDouble)
+            inputNodes ! Input("n-1-2", splits(1).toDouble)
+            inputNodes ! Input("n-1-3", splits(2).toDouble)
+          }
       }
     }
   }
