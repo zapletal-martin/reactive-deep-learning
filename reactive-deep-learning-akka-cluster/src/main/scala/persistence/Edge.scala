@@ -45,8 +45,10 @@ trait HasInput extends PersistentActor {
   }
 
   def addInputRecover(): Receive = {
-    case AddedInputEvent(_, i) =>
-      input = i
+    case AddedInputEvent(_, i) => {
+        println(s"Recovering AddedInputEvent in $persistenceId")
+        input = i
+    }
   }
 }
 
@@ -61,8 +63,10 @@ trait HasOutput extends PersistentActor {
   }
 
   def addOutputRecover(): Receive = {
-    case AddedOutputEvent(_, o) =>
+    case  AddedOutputEvent(_, o) => {
+      println(s"Recovering AddedOutputEvent in $persistenceId")
       output = o
+    }
   }
 }
 

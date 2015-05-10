@@ -51,8 +51,10 @@ trait HasInputs extends Node {
   }
 
   def addInputRecover(): Receive = {
-    case AddedInputsEvent(r, i) =>
+    case AddedInputsEvent(r, i) => {
+      println(s"Recovering AddedInputsEvent in $persistenceId")
       inputs = i
+    }
   }
 }
 
@@ -67,7 +69,9 @@ trait HasOutputs extends Node {
   }
 
   def addOutputRecover(): Receive = {
-    case AddedOutputsEvent(r, i) =>
+    case AddedOutputsEvent(r, i) => {
+      println(s"Recovering AddedOutputsEvent in $persistenceId")
       outputs = i
+    }
   }
 }
