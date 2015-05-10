@@ -3,9 +3,8 @@ package persistence
 import akka.actor.Props
 import akka.contrib.pattern.{ClusterSharding, ShardRegion}
 import akka.persistence.PersistentActor
-import akka.remote.Ack
 import persistence.Edge._
-import persistence.Node.{Input, NodeId, WeightedInput}
+import persistence.Node.{Ack, Input, NodeId, WeightedInput}
 
 object Edge {
   case class AddInputCommand(recipient: NodeId, input: NodeId)
