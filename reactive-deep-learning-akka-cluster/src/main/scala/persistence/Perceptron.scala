@@ -20,7 +20,7 @@ class Perceptron() extends Neuron {
 
   override def receiveCommand: Receive = run orElse addInput orElse addOutput
 
-  override def receiveRecover: Receive = addInputRecover orElse addOutputRecover
+  override def receiveRecover: Receive = recover orElse addInputRecover orElse addOutputRecover
 
   private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[NodeId]) =
     w.length == in.length && f.length == in.length
@@ -40,5 +40,15 @@ class Perceptron() extends Neuron {
 
         outputs.foreach(shardRegion ! Input(_, activation))
       }
+
+    case UpdateBiasCommand(r, b) =>
+      persist(UpdatedBiasEvent(r, b)) { event =>
+        bias = event.bias
+      }
+  }
+
+  def recover: Receive = {
+    case UpdatedBiasEvent(_, b) =>
+      bias = b
   }
 }

@@ -4,26 +4,31 @@ import akka.actor.Props
 import akka.contrib.pattern.{ClusterSharding, ShardRegion}
 import akka.persistence.PersistentActor
 import akka.remote.Ack
-import persistence.Edge.{AddedInputEvent, AddedOutputEvent, AddInputCommand, AddOutputCommand}
+import persistence.Edge._
 import persistence.Node.{Input, NodeId, WeightedInput}
 
 object Edge {
   case class AddInputCommand(recipient: NodeId, input: NodeId)
   case class AddOutputCommand(recipient: NodeId, output: NodeId)
+  case class UpdateWeightCommand(recipient: NodeId, weight: Double)
 
   case class AddedInputEvent(recipient: NodeId, input: NodeId)
   case class AddedOutputEvent(recipient: NodeId, output: NodeId)
+  case class UpdatedWeightEvent(recipient: NodeId, weight: Double)
+
 
   val idExtractor: ShardRegion.IdExtractor = {
     case a: AddInputCommand => (a.recipient.toString, a)
     case o: AddOutputCommand => (o.recipient.toString, o)
     case s: Input => (s.recipient.toString, s)
+    case w: UpdateWeightCommand => (w.recipient, w)
   }
 
   val shardResolver: ShardRegion.ShardResolver = {
     case a: AddInputCommand => (a.recipient.hashCode % 100).toString
     case o: AddOutputCommand => (o.recipient.hashCode % 100).toString
     case s: Input => (s.recipient.hashCode % 100).toString
+    case w: UpdateWeightCommand => (w.recipient.hashCode % 100).toString
   }
 
   def props(): Props = Props[Edge]
@@ -41,10 +46,8 @@ trait HasInput extends PersistentActor {
   }
 
   def addInputRecover(): Receive = {
-    case AddedInputEvent(_, i) => {
-      //println(s"Recovering AddedInputEvent in $persistenceId")
+    case AddedInputEvent(_, i) =>
       input = i
-    }
   }
 }
 
@@ -59,10 +62,8 @@ trait HasOutput extends PersistentActor {
   }
 
   def addOutputRecover(): Receive = {
-    case AddedOutputEvent(_, o) => {
-      //println(s"Recovering AddedOutputEvent in $persistenceId")
+    case AddedOutputEvent(_, o) =>
       output = o
-    }
   }
 }
 
@@ -73,7 +74,7 @@ class Edge extends HasInput with HasOutput {
 
   override def receiveCommand: Receive = run orElse addInput orElse addOutput
 
-  override def receiveRecover: Receive = addInputRecover orElse addOutputRecover
+  override def receiveRecover: Receive = recover orElse addInputRecover orElse addOutputRecover
 
   val shardRegion = ClusterSharding(context.system).shardRegion(Perceptron.shardName)
   val shardRegionLastLayer = ClusterSharding(context.system).shardRegion(OutputNode.shardName)
@@ -84,5 +85,15 @@ class Edge extends HasInput with HasOutput {
         shardRegionLastLayer ! WeightedInput(output, f, weight)
       else
         shardRegion ! WeightedInput(output, f, weight)
+
+    case UpdateWeightCommand(r, w) =>
+      persist(UpdatedWeightEvent(r, w)) { event =>
+        weight = event.weight
+      }
+  }
+
+  def recover: Receive = {
+    case UpdatedWeightEvent(_, w) =>
+      weight = w
   }
 }

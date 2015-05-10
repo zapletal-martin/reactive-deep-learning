@@ -10,6 +10,9 @@ object Node {
 
   case class AddInputs(recipient: NodeId, input: Seq[NodeId])
   case class AddOutputs(recipient: NodeId, output: Seq[NodeId])
+
+  case class UpdateBias(recipient: NodeId, bias: Double)
+
   case object Ack
 
   val idExtractor: ShardRegion.IdExtractor = {
@@ -17,6 +20,7 @@ object Node {
     case o: AddOutputs => (o.recipient.toString, o)
     case s: WeightedInput => (s.recipient.toString, s)
     case s: Input => (s.recipient.toString, s)
+    case b: UpdateBias => (b.recipient.toString, b)
   }
 
   val shardResolver: ShardRegion.ShardResolver = {
@@ -24,6 +28,7 @@ object Node {
     case o: AddOutputs => (o.recipient.hashCode % 100).toString
     case s: WeightedInput => (s.recipient.hashCode % 100).toString
     case s: Input => (s.recipient.hashCode % 100).toString
+    case b: UpdateBias => (b.recipient.hashCode % 100).toString
   }
 }
 

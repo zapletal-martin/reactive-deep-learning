@@ -11,9 +11,6 @@ object Node {
 
   case class UpdateBiasCommand(bias: Double)
   case class UpdatedBiasEvent(bias: Double)
-
-  case class UpdateWeightCommand(weight: Double)
-  case class UpdatedWeightEvent(weight: Double)
 }
 
 trait Node extends Actor

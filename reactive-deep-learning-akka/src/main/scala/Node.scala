@@ -7,6 +7,7 @@ object Node {
   trait NodeMessage
   case class Input(feature: Double) extends NodeMessage with EdgeMessage
   case class WeightedInput(feature: Double, weight: Double) extends NodeMessage
+  case class UpdateBias(bias: Double) extends NodeMessage
 
   case object Ack
   case class AddInputs(inputs: Seq[ActorRef[Nothing]], replyTo: ActorRef[Ack.type]) extends NodeMessage

@@ -28,6 +28,7 @@ object Edge {
   trait EdgeMessage
   case class AddInput(input: ActorRef[Nothing], replyTo: ActorRef[Ack.type]) extends EdgeMessage
   case class AddOutput(output: ActorRef[WeightedInput], replyTo: ActorRef[Ack.type]) extends EdgeMessage
+  case class UpdateWeight(weight: Double) extends EdgeMessage
 
   def props() = Props(receive)
 
@@ -37,5 +38,8 @@ object Edge {
     case Input(f) =>
       output ! WeightedInput(f, weight)
       run(input, output, weight)
+
+    case UpdateWeight(newWeight) =>
+      run(input, output, newWeight)
   }
 }

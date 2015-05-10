@@ -34,5 +34,8 @@ object Perceptron {
       } else {
         run(inputs, outputs, bias, activationFunction, weightsTplusOne, featuresTplusOne)
       }
+
+    case UpdateBias(newBias) =>
+      run(inputs, outputs, newBias, activationFunction, weightsT, featuresT)
   }
 }

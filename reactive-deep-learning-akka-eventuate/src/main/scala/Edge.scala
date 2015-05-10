@@ -1,7 +1,7 @@
 import Node.InputCommand
 import Node.WeightedInputCommand
 import Node._
-import Edge.{AddInputCommand, AddOutputCommand}
+import Edge.{UpdateWeightCommand, UpdatedWeightEvent, AddInputCommand, AddOutputCommand}
 import akka.actor.{ActorRef, Actor, Props}
 import com.rbmhtechnology.eventuate.{VectorTime, ConcurrentVersions, EventsourcedActor}
 
@@ -10,6 +10,9 @@ import scala.util.{Success, Failure}
 object Edge {
   case class AddInputCommand(input: ActorRef)
   case class AddOutputCommand(output: ActorRef)
+
+  case class UpdateWeightCommand(weight: Double)
+  case class UpdatedWeightEvent(weight: Double)
 
   def props(aggregateId: Option[String], replicaId: String, eventLog: ActorRef): Props =
     Props(new Edge(aggregateId, replicaId, eventLog))

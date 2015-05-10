@@ -13,9 +13,11 @@ object Node {
 
   case class AddInputsCommand(recipient: NodeId, input: Seq[NodeId])
   case class AddOutputsCommand(recipient: NodeId, output: Seq[NodeId])
+  case class UpdateBiasCommand(recipient: NodeId, bias: Double)
 
   case class AddedInputsEvent(recipient: NodeId, input: Seq[NodeId])
   case class AddedOutputsEvent(recipient: NodeId, output: Seq[NodeId])
+  case class UpdatedBiasEvent(recipient: NodeId, bias: Double)
 
   case object Ack
 
@@ -24,6 +26,7 @@ object Node {
     case o: AddOutputsCommand => (o.recipient.toString, o)
     case s: WeightedInput => (s.recipient.toString, s)
     case s: Input => (s.recipient.toString, s)
+    case b: UpdateBiasCommand => (b.recipient.toString, b)
   }
 
   val shardResolver: ShardRegion.ShardResolver = {
@@ -31,6 +34,7 @@ object Node {
     case o: AddOutputsCommand => (o.recipient.hashCode % 100).toString
     case s: WeightedInput => (s.recipient.hashCode % 100).toString
     case s: Input => (s.recipient.hashCode % 100).toString
+    case b: UpdateBiasCommand => (b.recipient.hashCode % 100).toString
   }
 }
 
@@ -47,10 +51,8 @@ trait HasInputs extends Node {
   }
 
   def addInputRecover(): Receive = {
-    case AddedInputsEvent(r, i) => {
-      //println(s"Recovering AddedInputsEvent in $persistenceId")
+    case AddedInputsEvent(r, i) =>
       inputs = i
-    }
   }
 }
 
@@ -65,9 +67,7 @@ trait HasOutputs extends Node {
   }
 
   def addOutputRecover(): Receive = {
-    case AddedOutputsEvent(r, i) => {
-      //println(s"Recovering AddedInputsEvent in $persistenceId")
+    case AddedOutputsEvent(r, i) =>
       outputs = i
-    }
   }
 }

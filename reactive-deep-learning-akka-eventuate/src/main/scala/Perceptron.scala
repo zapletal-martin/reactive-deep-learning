@@ -22,6 +22,7 @@ class Perceptron(
 
   override def onCommand: Receive = run orElse addInput orElse addOutput
 
+  //TODO: Handle conflicts
   override def onEvent: Receive = {
     case UpdatedBiasEvent(b) => bias = b
   }
@@ -47,9 +48,7 @@ class Perceptron(
       persist(UpdatedBiasEvent(b)) {
         case Success(evt) =>
           onEvent(evt)
-          println(s"Successfuly persisted bias update $evt")
         case Failure(e) =>
-          println(s"Failed to persist bias update ${e.getMessage}")
       }
   }
 }

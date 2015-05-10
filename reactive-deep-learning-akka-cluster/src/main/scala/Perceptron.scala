@@ -35,5 +35,8 @@ class Perceptron() extends Neuron {
 
         outputs.foreach(shardRegion ! Input(_, activation))
       }
+
+    case UpdateBias(_, b) =>
+      bias = b
   }
 }
