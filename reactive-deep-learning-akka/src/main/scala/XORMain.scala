@@ -154,19 +154,15 @@ object XORMain extends App {
           edgeh4o1 ! UpdateWeight(22.172982906414187)
           edgeh5o1 ! UpdateWeight( -53.706172957900264)
 
-          Thread.sleep(1000)
           inputLayer1 ! Input(0)
           inputLayer2 ! Input(0)
 
-          Thread.sleep(1000)
           inputLayer1 ! Input(0)
           inputLayer2 ! Input(1)
 
-          Thread.sleep(1000)
           inputLayer1 ! Input(1)
           inputLayer2 ! Input(0)
-
-          Thread.sleep(1000)
+          
           inputLayer1 ! Input(1)
           inputLayer2 ! Input(1)
 
