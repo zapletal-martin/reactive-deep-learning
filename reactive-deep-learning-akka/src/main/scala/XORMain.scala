@@ -162,7 +162,7 @@ object XORMain extends App {
 
           inputLayer1 ! Input(1)
           inputLayer2 ! Input(0)
-          
+
           inputLayer1 ! Input(1)
           inputLayer2 ! Input(1)
 

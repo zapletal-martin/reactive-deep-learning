@@ -15,7 +15,10 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion,
   "org.apache.spark" %% "spark-mllib" % sparkVersion,
+  "org.apache.spark" %% "spark-sql" % sparkVersion,
   "org.scalanlp" %% "breeze" % "0.11.2",
   "com.github.fommil.netlib" % "all" % "1.1.2" pomOnly(),
   "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 )
+
+fork in run := true
