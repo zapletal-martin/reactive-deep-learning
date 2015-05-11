@@ -28,8 +28,8 @@ object Perceptron {
 
       if(allInputsAvailable(featuresTplusOne, weightsTplusOne, inputs)) {
         val activation = activationFunction(weightsTplusOne.zip(featuresTplusOne).map(x => x._1 * x._2).sum + bias)
-
         outputs.foreach(_ ! Input(activation))
+
         run(inputs, outputs, bias, activationFunction, Seq(), Seq())
       } else {
         run(inputs, outputs, bias, activationFunction, weightsTplusOne, featuresTplusOne)
