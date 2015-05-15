@@ -1,7 +1,7 @@
 package persistence
 
 import akka.actor._
-import akka.contrib.pattern.ClusterSharding
+import akka.cluster.sharding.ClusterSharding
 import akka.pattern.ask
 import akka.persistence.journal.leveldb.{SharedLeveldbJournal, SharedLeveldbStore}
 import akka.util.Timeout

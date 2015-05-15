@@ -13,7 +13,7 @@ object Main extends App {
       Seq(Perceptron.activation(Seq(0.3, 0.3, 0.3), _, 0.2, Neuron.sigmoid))
     )
 
-    scala.io.Source.fromFile("src/main/resources/data.csv")
+    scala.io.Source.fromFile("src/main/resources/data2.csv")
       .getLines()
       .toList
       .par

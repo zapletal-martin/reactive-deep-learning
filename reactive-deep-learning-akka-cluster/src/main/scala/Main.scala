@@ -1,7 +1,7 @@
 import Node.{Input, AddInputs, AddOutputs}
 import Edge.{AddOutput, AddInput}
 import akka.actor._
-import akka.contrib.pattern.ClusterSharding
+import akka.cluster.sharding.ClusterSharding
 import akka.persistence.journal.leveldb.{SharedLeveldbJournal, SharedLeveldbStore}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory

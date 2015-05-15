@@ -17,7 +17,7 @@ class Perceptron extends Neuron {
     featuresT = featuresT :+ in.feature
     weightsT = weightsT :+ in.weight
 
-    println(s"Features size ${featuresT.size} weights size ${weightsT.size}")
+    //println(s"Features size ${featuresT.size} weights size ${weightsT.size}")
 
     if(allInputsAvailable(weightsT, featuresT, inputs)) {
       val activation = activationFunction(weightsT.zip(featuresT).map(x => x._1 * x._2).sum + bias)

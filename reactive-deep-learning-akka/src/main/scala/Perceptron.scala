@@ -7,14 +7,14 @@ object Perceptron {
   import HasOutputs._
   import Neuron._
 
-  def props() = Props(receive)
+  def props() = Props(behaviour)
 
-  def receive = addInput(addOutput(run(_, _, 0.2, sigmoid, Seq(), Seq()), _)) // run && addInput && addOutput
+  def behaviour = addInput(addOutput(feedForward(_, _, 0.2, sigmoid, Seq(), Seq()), _))
 
   private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[ActorRef[Nothing]]) =
     w.length == in.length && f.length == in.length
 
-  def run(
+  def feedForward(
       inputs: Seq[ActorRef[Nothing]],
       outputs: Seq[ActorRef[Input]],
       bias: Double,
@@ -27,15 +27,16 @@ object Perceptron {
       val weightsTplusOne = weightsT :+ w
 
       if(allInputsAvailable(featuresTplusOne, weightsTplusOne, inputs)) {
+        //println(s"Weights $weightsTplusOne, features $featuresTplusOne")
         val activation = activationFunction(weightsTplusOne.zip(featuresTplusOne).map(x => x._1 * x._2).sum + bias)
         outputs.foreach(_ ! Input(activation))
 
-        run(inputs, outputs, bias, activationFunction, Seq(), Seq())
+        feedForward(inputs, outputs, bias, activationFunction, Seq(), Seq())
       } else {
-        run(inputs, outputs, bias, activationFunction, weightsTplusOne, featuresTplusOne)
+        feedForward(inputs, outputs, bias, activationFunction, weightsTplusOne, featuresTplusOne)
       }
 
     case UpdateBias(newBias) =>
-      run(inputs, outputs, newBias, activationFunction, weightsT, featuresT)
+      feedForward(inputs, outputs, newBias, activationFunction, weightsT, featuresT)
   }
 }

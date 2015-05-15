@@ -1,7 +1,7 @@
 package persistence
 
 import akka.actor.Props
-import akka.contrib.pattern.ClusterSharding
+import akka.cluster.sharding.ClusterSharding
 import persistence.Node.Input
 
 object InputNode {

@@ -3,7 +3,7 @@ package oo
 import oo.Node.WeightedInput
 
 object Main extends App {
-  override def main (args: Array[String]) {
+  override def main (args: Array[String]) = {
     val inputLayer1 = new InputNode()
     val inputLayer2 = new InputNode()
     val inputLayer3 = new InputNode()
@@ -74,7 +74,7 @@ object Main extends App {
 
     printer.addInputs(Seq(edgeo1p1))
 
-    scala.io.Source.fromFile("src/main/resources/data.csv")
+    scala.io.Source.fromFile("src/main/resources/data2.csv")
       .getLines()
       .toList
       .par

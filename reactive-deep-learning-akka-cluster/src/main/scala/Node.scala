@@ -1,6 +1,6 @@
 import Node.{Ack, NodeId, AddInputs, AddOutputs}
 import akka.actor._
-import akka.contrib.pattern.ShardRegion
+import akka.cluster.sharding.ShardRegion
 
 object Node {
   type NodeId = String

@@ -1,7 +1,7 @@
 import Edge.{UpdateWeight, AddOutput, AddInput}
 import Node.{Ack, NodeId, Input, WeightedInput}
 import akka.actor.{Props, Actor}
-import akka.contrib.pattern.{ShardRegion, ClusterSharding}
+import akka.cluster.sharding.{ClusterSharding, ShardRegion}
 
 object Edge {
   case class AddInput(recipient: NodeId, input: NodeId)

@@ -1,6 +1,6 @@
 import Node.Input
 import akka.actor.Props
-import akka.contrib.pattern.ClusterSharding
+import akka.cluster.sharding.ClusterSharding
 
 object InputNode {
   def props(): Props = Props[InputNode]

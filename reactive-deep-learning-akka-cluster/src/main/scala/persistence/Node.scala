@@ -1,7 +1,7 @@
 package persistence
 
 import akka.actor._
-import akka.contrib.pattern.ShardRegion
+import akka.cluster.sharding.ShardRegion
 import akka.persistence.PersistentActor
 import persistence.Node._
 

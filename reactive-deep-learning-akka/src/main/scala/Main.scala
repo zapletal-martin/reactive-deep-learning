@@ -8,7 +8,6 @@ import akka.typed._
 import akka.typed.ScalaDSL._
 import akka.typed.AskPattern._
 
-
 object Main extends App {
 
   //**************************************
@@ -106,7 +105,8 @@ object Main extends App {
 
           Await.result(printer ? (AddInputs(Seq(edgeo1p1), _: ack)), d)
 
-          scala.io.Source.fromFile("src/main/resources/data.csv")
+          var i = 0
+          scala.io.Source.fromFile("src/main/resources/data2.csv")
             .getLines()
             .foreach{ l =>
               val splits = l.split(",")
@@ -114,6 +114,12 @@ object Main extends App {
               inputLayer1 ! Input(splits(0).toDouble)
               inputLayer2 ! Input(splits(1).toDouble)
               inputLayer3 ! Input(splits(2).toDouble)
+
+              if(i == 2) {
+                ctx.stop(hiddenLayer1)
+              }
+
+              i = i + 1
             }
 
           Same

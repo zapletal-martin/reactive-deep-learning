@@ -11,10 +11,8 @@ package fp
 */
 
 object Perceptron {
-  def activation(w: Seq[Double], f: Seq[Double], bias: Double, activationFunction: Double => Double) = {
+  def activation(w: Seq[Double], f: Seq[Double], bias: Double, activationFunction: Double => Double) =
     activationFunction(w.zip(f).map(x => x._1 * x._2).sum + bias)
-  }
-
 }
 
 object Network {
