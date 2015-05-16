@@ -48,13 +48,13 @@ object ReplicationMain extends App {
         }
       }
     }
-
+    
     (0 to 2)
       .par
       .foreach{ j =>
-      inputs(0)._4 ! UpdateWeight(0.1 * j)
-      inputs(1)._4 ! UpdateWeight(0.2 * j)
-      inputs(2)._4 ! UpdateWeight(0.3 * j)
+        inputs(0)._4 ! UpdateWeight(0 + j)
+        inputs(1)._4 ! UpdateWeight(3 + j)
+        inputs(2)._4 ! UpdateWeight(6 + j)
     }
   }
 
@@ -163,12 +163,12 @@ object ReplicationMain extends App {
       case ActorIdentity(_, Some(ref)) => SharedLeveldbJournal.setStore(ref, system)
       case _ =>
         system.log.error("Shared journal not started at {}", path)
-        system.terminate()
+        system.shutdown()
     }
     f.onFailure {
       case _ =>
         system.log.error("Lookup of shared journal at {} timed out", path)
-        system.terminate()
+        system.shutdown()
     }
   }
 }

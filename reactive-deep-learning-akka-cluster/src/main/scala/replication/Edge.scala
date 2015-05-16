@@ -2,15 +2,15 @@ package replication
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.cluster.Cluster
-import akka.contrib.datareplication.{ORSet, DataReplication}
-import akka.contrib.datareplication.Replicator.{Changed, Subscribe, WriteLocal, Update}
+import akka.contrib.datareplication.Replicator.{Changed, Subscribe, Update, WriteLocal}
+import akka.contrib.datareplication.{DataReplication, GCounter}
 import replication.Edge.{AddInput, AddOutput, UpdateWeight}
 import replication.Node.{Ack, Input, WeightedInput}
 
 object Edge {
   case class AddInput(input: ActorRef)
   case class AddOutput(output: ActorRef)
-  case class UpdateWeight(weight: Double)
+  case class UpdateWeight(weight: Long)
 
   def props(): Props = Props[Edge]
 }
@@ -48,11 +48,10 @@ class Edge extends HasInput with HasOutput {
       output ! WeightedInput(f, weight)
 
     case UpdateWeight(w) =>
-      println(s"Updating weight to $w")
-      replicator ! Update("key", ORSet(), WriteLocal)(_ + 1)
-      weight = w
+      replicator ! Update("key", GCounter(), WriteLocal)(_ + w)
 
-    case Changed("key", ORSet(elements)) =>
-      println("Current elements: {}", elements)
+    case Changed("key", GCounter(mergedWeight)) =>
+      weight = mergedWeight
+      println(s"Current weight is $mergedWeight")
   }
 }

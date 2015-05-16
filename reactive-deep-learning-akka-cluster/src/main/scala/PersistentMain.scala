@@ -1,7 +1,7 @@
 package persistence
 
 import akka.actor._
-import akka.cluster.sharding.ClusterSharding
+import akka.contrib.pattern.ClusterSharding
 import akka.pattern.ask
 import akka.persistence.journal.leveldb.{SharedLeveldbJournal, SharedLeveldbStore}
 import akka.util.Timeout
@@ -43,16 +43,16 @@ object PersistentMain extends App {
         ActorPath.fromString("akka.tcp://ClusterSystem@127.0.0.1:2551/user/store"))
 
       val nodes = ClusterSharding(system).start(
-        Perceptron.shardName, Some(Perceptron.props), None, false, Node.idExtractor, Node.shardResolver)
+        Perceptron.shardName, Some(Perceptron.props), Node.idExtractor, Node.shardResolver)
 
       val inputNodes = ClusterSharding(system).start(
-        InputNode.shardName, Some(InputNode.props), None, false, Node.idExtractor, Node.shardResolver)
+        InputNode.shardName, Some(InputNode.props), Node.idExtractor, Node.shardResolver)
 
       val outputNodes = ClusterSharding(system).start(
-        OutputNode.shardName, Some(OutputNode.props), None, false, Node.idExtractor, Node.shardResolver)
+        OutputNode.shardName, Some(OutputNode.props),Node.idExtractor, Node.shardResolver)
 
       val edges = ClusterSharding(system).start(
-        Edge.shardName, Some(Edge.props), None, false, Edge.idExtractor, Edge.shardResolver)
+        Edge.shardName, Some(Edge.props), Edge.idExtractor, Edge.shardResolver)
 
       if(port == "0") {
         implicit val t = Timeout(10 seconds)
@@ -128,12 +128,12 @@ object PersistentMain extends App {
       case ActorIdentity(_, Some(ref)) => SharedLeveldbJournal.setStore(ref, system)
       case _ =>
         system.log.error("Shared journal not started at {}", path)
-        system.terminate()
+        system.shutdown()
     }
     f.onFailure {
       case _ =>
         system.log.error("Lookup of shared journal at {} timed out", path)
-        system.terminate()
+        system.shutdown()
     }
   }
 }

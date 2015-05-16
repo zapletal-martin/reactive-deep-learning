@@ -1,7 +1,7 @@
 package persistence
 
 import akka.actor.Props
-import akka.cluster.sharding.ClusterSharding
+import akka.contrib.pattern.ClusterSharding
 import persistence.Node._
 
 object Perceptron {

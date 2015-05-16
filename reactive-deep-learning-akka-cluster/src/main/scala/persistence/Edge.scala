@@ -1,7 +1,7 @@
 package persistence
 
 import akka.actor.Props
-import akka.cluster.sharding.{ClusterSharding, ShardRegion}
+import akka.contrib.pattern.{ClusterSharding, ShardRegion}
 import akka.persistence.PersistentActor
 import persistence.Edge._
 import persistence.Node.{Ack, Input, NodeId, WeightedInput}

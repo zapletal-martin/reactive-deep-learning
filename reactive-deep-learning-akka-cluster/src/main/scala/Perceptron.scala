@@ -1,6 +1,6 @@
 import Node._
 import akka.actor.Props
-import akka.cluster.sharding.ClusterSharding
+import akka.contrib.pattern.ClusterSharding
 
 object Perceptron {
   def props(): Props = Props[Perceptron]
