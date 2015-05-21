@@ -1,5 +1,5 @@
-import Node.{UpdateWeightCommand, InputCommand, AddInputsCommand, AddOutputsCommand}
-import Edge.{AddInputCommand, AddOutputCommand}
+import Node.{InputCommand, AddInputsCommand, AddOutputsCommand}
+import Edge.{UpdateWeightCommand, AddInputCommand, AddOutputCommand}
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.util.Timeout
 import akka.pattern.ask
@@ -24,7 +24,7 @@ object Main extends App {
   //**************************************
   override def main(params: Array[String]) = {
     val system = ActorSystem("akka")
-    val eventLog = system.actorOf(LeveldbEventLog.props(id = "L1", prefix = "log"))
+    val eventLog = system.actorOf(LeveldbEventLog.props(logId = "L1", prefix = "log", batching = false))
 
     val parallelModels = Array(
       network(system, eventLog, 0),
@@ -51,13 +51,13 @@ object Main extends App {
       }
     }
 
-    /*(0 to 2)
+    (0 to 2)
       .par
       .foreach{ j =>
-        parallelModels(0)._4 ! UpdateWeightCommand(0.1 * j)
-        parallelModels(1)._4 ! UpdateWeightCommand(0.2 * j)
-        parallelModels(2)._4 ! UpdateWeightCommand(0.3 * j)
-    }*/
+        parallelModels(0)._4 ! UpdateWeightCommand(0 + j)
+        parallelModels(1)._4 ! UpdateWeightCommand(3 + j)
+        parallelModels(2)._4 ! UpdateWeightCommand(6 + j)
+    }
   }
 
   private def network(system: ActorSystem, eventLog: ActorRef, replica: Int) = {

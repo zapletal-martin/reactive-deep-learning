@@ -1,8 +1,8 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import akka.stream.{FlowShape, SinkShape, Outlet, FanInShape2}
 import akka.stream.scaladsl._
+import akka.stream.{FanInShape2, FlowShape, Outlet}
 import breeze.linalg.{*, DenseMatrix}
 import breeze.numerics.sigmoid
 
@@ -15,16 +15,16 @@ object PerLayer {
         new DenseMatrix[Double](topology(layer), topology(layer - 1), Array.fill(topology(layer) * topology(layer - 1))(0.3))))
 
     def hiddenLayer(layer: Int) = {
-      def feedForward(data: DenseMatrix[Double], weightMatrices: DenseMatrix[Double]) = {
+      def feedForward(features: DenseMatrix[Double], weightMatrices: DenseMatrix[Double]) = {
         val bias = 0.2
-        val activation: DenseMatrix[Double] = weightMatrices * data
+        val activation: DenseMatrix[Double] = weightMatrices * features
         activation(::, *) :+= bias
         sigmoid.inPlace(activation)
         activation
       }
 
       FlowGraph.partial() { implicit builder: FlowGraph.Builder[Unit] =>
-        import FlowGraph.Implicits._
+        import akka.stream.scaladsl.FlowGraph.Implicits._
 
         val zipInputAndWeights = builder.add(Zip[DenseMatrix[Double], DenseMatrix[Double]]())
         val feedForwardFlow = builder.add(Flow[(DenseMatrix[Double], DenseMatrix[Double])].map(x => feedForward(x._1, x._2)))
@@ -39,7 +39,7 @@ object PerLayer {
     def network(topology: Array[Int], weights: DenseMatrix[Double]) = {
 
       FlowGraph.partial() { implicit builder: FlowGraph.Builder[Unit] =>
-        import FlowGraph.Implicits._
+        import akka.stream.scaladsl.FlowGraph.Implicits._
 
         def buildLayer(
             layer: Int,
@@ -47,12 +47,12 @@ object PerLayer {
             topology: Array[Int],
             weights: DenseMatrix[Double]): Outlet[DenseMatrix[Double]] = {
 
-          val layer1 = builder.add(hiddenLayer(layer))
+          val currentLayer = builder.add(hiddenLayer(layer))
 
-          input                                        ~> layer1.in0
-          hiddenLayerWeights(topology, layer, weights) ~> layer1.in1
+          input                                        ~> currentLayer.in0
+          hiddenLayerWeights(topology, layer, weights) ~> currentLayer.in1
 
-          if (layer < topology.length - 1) buildLayer(layer + 1, layer1.out, topology, weights) else layer1.out
+          if (layer < topology.length - 1) buildLayer(layer + 1, currentLayer.out, topology, weights) else currentLayer.out
         }
 
         val flow = builder.add(Flow[DenseMatrix[Double]])
@@ -64,7 +64,7 @@ object PerLayer {
 
     val zipWithIndex =
       FlowGraph.partial() { implicit builder: FlowGraph.Builder[Unit] =>
-        import FlowGraph.Implicits._
+        import akka.stream.scaladsl.FlowGraph.Implicits._
 
         val zipWithIndex = builder.add(Zip[DenseMatrix[Double], Int]())
         val index = Source(() => Iterator.from(0, 1))
@@ -85,7 +85,7 @@ object PerLayer {
     val weights = new DenseMatrix[Double](3, 6, Array.fill(3 * 6)(0.3))
 
     FlowGraph.closed() { implicit builder: FlowGraph.Builder[Unit] =>
-      import FlowGraph.Implicits._
+      import akka.stream.scaladsl.FlowGraph.Implicits._
       input ~> network(topology, weights) ~> zipWithIndex ~> formatPrintSink
     }
   }

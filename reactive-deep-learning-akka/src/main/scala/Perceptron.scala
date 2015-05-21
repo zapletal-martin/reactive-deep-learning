@@ -9,9 +9,9 @@ object Perceptron {
 
   def props() = Props(behaviour)
 
-  def behaviour = addInput(addOutput(feedForward(_, _, 0.2, sigmoid, Seq(), Seq()), _))
+  def behaviour = addInput(addOutput(feedForward(_, _, 0.2, sigmoid, Vector(), Vector()), _))
 
-  private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[ActorRef[Nothing]]) =
+  private def allInputsAvailable(w: Vector[Double], f: Vector[Double], in: Seq[ActorRef[Nothing]]) =
     w.length == in.length && f.length == in.length
 
   def feedForward(
@@ -19,8 +19,8 @@ object Perceptron {
       outputs: Seq[ActorRef[Input]],
       bias: Double,
       activationFunction: Double => Double,
-      weightsT: Seq[Double],
-      featuresT: Seq[Double]): Behavior[NodeMessage] = Partial[NodeMessage] {
+      weightsT: Vector[Double],
+      featuresT: Vector[Double]): Behavior[NodeMessage] = Partial[NodeMessage] {
 
     case WeightedInput(f, w) =>
       val featuresTplusOne = featuresT :+ f
@@ -31,7 +31,7 @@ object Perceptron {
         val activation = activationFunction(weightsTplusOne.zip(featuresTplusOne).map(x => x._1 * x._2).sum + bias)
         outputs.foreach(_ ! Input(activation))
 
-        feedForward(inputs, outputs, bias, activationFunction, Seq(), Seq())
+        feedForward(inputs, outputs, bias, activationFunction, Vector(), Vector())
       } else {
         feedForward(inputs, outputs, bias, activationFunction, weightsTplusOne, featuresTplusOne)
       }

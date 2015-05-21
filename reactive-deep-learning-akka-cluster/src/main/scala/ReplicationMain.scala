@@ -48,7 +48,7 @@ object ReplicationMain extends App {
         }
       }
     }
-    
+
     (0 to 2)
       .par
       .foreach{ j =>

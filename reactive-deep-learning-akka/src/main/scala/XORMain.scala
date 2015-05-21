@@ -152,7 +152,7 @@ object XORMain extends App {
           edgeh2o1 ! UpdateWeight(-22.904824971874294)
           edgeh3o1 ! UpdateWeight(-67.1736083116406)
           edgeh4o1 ! UpdateWeight(22.172982906414187)
-          edgeh5o1 ! UpdateWeight( -53.706172957900264)
+          edgeh5o1 ! UpdateWeight(-53.706172957900264)
 
           inputLayer1 ! Input(0)
           inputLayer2 ! Input(0)

@@ -17,17 +17,24 @@ object CatalystMain extends App {
     import sqlContext.implicits._
 
     val people = sc.parallelize(data)
-    val filtered = people.filter(p => p.age >= 20 && p.age <= 35).map(_.name).filter(_ == "John")
+    //val filtered = people.filter(p => p.age >= 20 && p.age <= 35).map(_.name).filter(_ == "John")
 
     val peopleDF = people.toDF()
-    val filtered2 = peopleDF.select(peopleDF("name"), peopleDF("age")).where(peopleDF("age") >= 20 && peopleDF("age") <= 35).select(peopleDF("name")).where(peopleDF("name") === "John")
+    //val filtered2 = peopleDF.select(peopleDF("name"), peopleDF("age")).where(peopleDF("age") >= 20 && peopleDF("age") <= 35).where(peopleDF("name") === "John")
 
-    //peopleDF.registerTempTable("people")
-    //val filtered3 = sqlContext.sql("SELECT age FROM (SELECT age, name FROM people) p WHERE p.age >= 20 AND p.age <= 35")
+    //val typeCheck = peopleDF.where(peopleDF("age") === "John").select(peopleDF("name") * 2)
+
+    peopleDF.registerTempTable("people")
+    val filtered3 = sqlContext.sql("SELECT name FROM (SELECT age, name FROM people) p WHERE p.age >= 20 AND p.age <= 35 AND p.name = \"John\"")
+
     //val filtered3 = sqlContext.sql("SELECT name FROM people WHERE age >= 20 AND age <= 35")
 
-    filtered2.explain(true)
-    filtered2.foreach(println)
+    //typeCheck.foreach(println)
+    println("START")
+    println(filtered3.queryExecution)
+    println("STOP")
+    //filtered3.explain(true)
+    //filtered3.foreach(println)
     //filtered2.foreach(println)
     //filtered3.foreach(println)
   }

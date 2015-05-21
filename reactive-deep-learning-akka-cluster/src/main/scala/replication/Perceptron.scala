@@ -12,12 +12,12 @@ class Perceptron() extends Neuron {
   override var activationFunction: Double => Double = Neuron.sigmoid
   override var bias: Double = 0.2
 
-  var weightsT: Seq[Double] = Seq()
-  var featuresT: Seq[Double] = Seq()
+  var weightsT: Vector[Double] = Vector()
+  var featuresT: Vector[Double] = Vector()
 
   override def receive = run orElse addInput orElse addOutput
 
-  private def allInputsAvailable(w: Seq[Double], f: Seq[Double], in: Seq[ActorRef]) =
+  private def allInputsAvailable(w: Vector[Double], f: Vector[Double], in: Seq[ActorRef]) =
     w.length == in.length && f.length == in.length
 
   def run: Receive = {
@@ -28,8 +28,8 @@ class Perceptron() extends Neuron {
       if(allInputsAvailable(weightsT, featuresT, inputs)) {
         val activation = activationFunction(weightsT.zip(featuresT).map(x => x._1 * x._2).sum + bias)
 
-        featuresT = Seq()
-        weightsT = Seq()
+        featuresT = Vector()
+        weightsT = Vector()
 
         outputs.foreach(_ ! Input(activation))
       }

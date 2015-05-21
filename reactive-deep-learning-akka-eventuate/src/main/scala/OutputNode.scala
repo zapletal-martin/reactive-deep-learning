@@ -17,7 +17,7 @@ class OutputNode() extends HasInputs {
   def run: Receive = {
     case WeightedInputCommand(f, w) => {
       val time = new Date(System.currentTimeMillis())
-      println(s"Output $i with result ${f} in ${format.format(time)}")
+      //println(s"Output $i with result ${f} in ${format.format(time)}")
       i = i + 1
     }
   }

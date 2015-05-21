@@ -11,11 +11,11 @@ package fp
 */
 
 object Perceptron {
-  def activation(w: Seq[Double], f: Seq[Double], bias: Double, activationFunction: Double => Double) =
+  def activation(w: Vector[Double], f: Vector[Double], bias: Double, activationFunction: Double => Double) =
     activationFunction(w.zip(f).map(x => x._1 * x._2).sum + bias)
 }
 
 object Network {
-  def feedForward(features: Seq[Double], network: Seq[Seq[Seq[Double] => Double]]): Seq[Double] =
+  def feedForward(features: Vector[Double], network: Seq[Vector[Vector[Double] => Double]]): Vector[Double] =
     network.foldLeft(features)((b, a) => a.map(_(b)))
 }
