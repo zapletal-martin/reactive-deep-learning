@@ -39,7 +39,7 @@ class Edge extends HasInput with HasOutput {
   val replicator = DataReplication(context.system).replicator
   implicit val cluster = Cluster(context.system)
 
-  replicator ! Subscribe("key", self)
+  replicator ! Subscribe(self.path.name, self)
 
   override def receive: Receive = run orElse addInput orElse addOutput
 
@@ -48,10 +48,11 @@ class Edge extends HasInput with HasOutput {
       output ! WeightedInput(f, weight)
 
     case UpdateWeight(w) =>
-      replicator ! Update("key", GCounter(), WriteLocal)(_ + w)
+      replicator ! Update(self.path.name, GCounter(), WriteLocal)(_ + w)
 
-    case Changed("key", GCounter(mergedWeight)) =>
+
+    case Changed(key, GCounter(mergedWeight)) if key == self.path.name =>
       weight = mergedWeight
-      //println(s"Current weight is $mergedWeight")
+      println(s"Weight on replica ${self.path.name} changed to $mergedWeight")
   }
 }

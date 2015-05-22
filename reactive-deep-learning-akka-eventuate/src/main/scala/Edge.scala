@@ -54,7 +54,7 @@ class Edge(
     case UpdatedWeightEvent(w) =>
       versionedState = versionedState.update(w, lastVectorTimestamp, lastEmitterReplicaId)
       if (versionedState.conflict) {
-        println(s"Conflicting versions for replica $replicaId " + versionedState.all)
+        println(s"Conflicting versions on replica $replicaId " + versionedState.all.map(v => s"value ${v.value} vector clock ${v.updateTimestamp} emitted by replica ${v.emitterReplicaId}"))
         val conflictingVersions = versionedState.all
         val avg = conflictingVersions.map(_.value).sum / conflictingVersions.size
 
@@ -63,7 +63,7 @@ class Edge(
         versionedState = versionedState.resolve(newTimestamp)
 
         weight = versionedState.all.head.value
-        println(s"Conflicting versions for replica $replicaId resolved " + versionedState.all)
+        println(s"Conflicting versions on replica $replicaId resolved " + versionedState.all.map(v => s"value ${v.value} vector clock ${v.updateTimestamp}"))
       } else {
         weight = versionedState.all.head.value
       }

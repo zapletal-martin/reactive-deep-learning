@@ -89,7 +89,7 @@ object ReplicationMain extends App {
       val printer = system.actorOf(OutputNode.props(), "printer")
 
       //Edges.
-      val edgei1h1 = system.actorOf(Edge.props(), "edgei1h1")
+      val edgei1h1 = system.actorOf(Edge.props(), s"edgei1h1r$port")
       val edgei1h2 = system.actorOf(Edge.props(), "edgei1h2")
       val edgei2h1 = system.actorOf(Edge.props(), "edgei2h1")
       val edgei2h2 = system.actorOf(Edge.props(), "edgei2h2")
