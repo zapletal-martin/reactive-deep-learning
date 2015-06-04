@@ -1,10 +1,9 @@
 import java.text.SimpleDateFormat
-import java.util.Date
 
-import breeze.linalg.{DenseMatrix, *}
+import breeze.linalg.{*, DenseMatrix}
+import breeze.numerics.sigmoid
 import com.github.fommil.netlib.BLAS
 import org.apache.spark.SparkContext
-import breeze.numerics.sigmoid
 
 object Main extends App {
 
@@ -41,14 +40,57 @@ object Main extends App {
     outArray(topology.size - 1)
   }
 
-  override def main (args: Array[String]) {
+  override def main (args: Array[String]): Unit = {
     val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 
     val topology = Array(3, 2, 1)
     val weights = Array(new DenseMatrix[Double](3, 6, Array.fill(3 * 6)(0.3)))
 
     val sc = new SparkContext("local", "Neural Network")
-    sc
+    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+    import sqlContext.implicits._
+
+     val result = sc.textFile("src/main/resources/data.csv", 3)
+       .map{ l =>
+         val splits = l.split(",")
+         val features = splits.map(_.toDouble)
+
+         new DenseMatrix(3, 1, Array(features(0), features(1), features(2)))
+       }
+       .map(in => forwardRun(topology, in, weights).valueAt(0, 0).toInt)
+
+    val resultDF = result.toDF("result")
+
+    resultDF
+      .filter(resultDF("result") > "String")
+      .select(resultDF("result") + "String")
+
+      //.foreach(r => println(s"Output $r in ${format.format(new Date(System.currentTimeMillis()))}"))
+
+    resultDF.registerTempTable("results")
+    val filtered3 = sqlContext.sql(
+      "SELECT result + \"String\" " +
+      "FROM (" +
+        "SELECT result " +
+        "FROM results) r " +
+      "WHERE r.result >= \"String\"")
+
+
+    //println(filtered3.queryExecution)
+    //println(filtered3.explain(true))
+    /*filtered3.foreach(println)
+    filtered3.printSchema()*/
+
+
+  }
+
+  /*override def main (args: Array[String]) {
+    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+
+    val topology = Array(3, 2, 1)
+    val weights = Array(new DenseMatrix[Double](3, 6, Array.fill(3 * 6)(0.3)))
+
+    new SparkContext("local", "Neural Network")
       .textFile("src/main/resources/data.csv", 4)
       .map{ l =>
         val splits = l.split(",")
@@ -59,5 +101,5 @@ object Main extends App {
       .map(in => forwardRun(topology, in, weights))
       .zipWithIndex()
       .foreach(r => println(s"Output ${r._2} with result ${r._1}in ${format.format(new Date(System.currentTimeMillis()))}"))
-  }
+  }*/
 }
