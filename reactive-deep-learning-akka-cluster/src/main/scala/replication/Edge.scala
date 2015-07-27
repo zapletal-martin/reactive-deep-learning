@@ -41,7 +41,7 @@ class Edge extends HasInput with HasOutput {
 
   replicator ! Subscribe(self.path.name, self)
 
-  override def receive: Receive = run orElse addInput orElse addOutput
+    override def receive: Receive = run orElse addInput orElse addOutput
 
   def run: Receive = {
     case Input(f) =>

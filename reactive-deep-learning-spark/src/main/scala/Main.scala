@@ -77,7 +77,7 @@ object Main extends App {
 
 
     //println(filtered3.queryExecution)
-    //println(filtered3.explain(true))
+    println(filtered3.explain(true))
     /*filtered3.foreach(println)
     filtered3.printSchema()*/
 

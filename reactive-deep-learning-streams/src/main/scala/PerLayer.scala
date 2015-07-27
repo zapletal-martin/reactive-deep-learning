@@ -35,6 +35,7 @@ object PerLayer {
       }
     }
 
+
     //TODO: Use weights. Now passed in just for readability. They are 0.3 every time
     def network(topology: Array[Int], weights: DenseMatrix[Double]) = {
 
